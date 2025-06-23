@@ -626,7 +626,7 @@
 
             if (loggedInUsername && allUsers[loggedInUsername]) {
                 loadCurrentUserData(); // Load specific user's data
-                document.getElementById('accountName').textContent = `Welcome, ${currentUserData.userName}!`;
+                checkAndProcessPendingTransactionsOnLoad(); // Check and process any pending timers
                 updateBalanceDisplay();
                 applyDailyGrowth();
                 renderInvestments();
@@ -758,11 +758,11 @@
             document.getElementById('withdrawAmountError').classList.add('hidden');
             document.getElementById('bankAccountNameError').classList.add('hidden');
             document.getElementById('bankAccountNumberError').classList.add('hidden');
-            document.getElementById('bankNameError').classList.add('hidden'); // Added for bank name
+            document.getElementById('bankNameError').classList.add('hidden');
             document.getElementById('withdrawAmount').classList.remove('border-red-500');
             document.getElementById('bankAccountName').classList.remove('border-red-500');
             document.getElementById('bankAccountNumber').classList.remove('border-red-500');
-            document.getElementById('bankName').classList.remove('border-red-500'); // Added for bank name
+            document.getElementById('bankName').classList.remove('border-red-500');
         }
 
 
@@ -802,9 +802,14 @@
                             buttonHtml = `<button data-id="${investment.id}" class="redeem-investment-button w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">Redeem ₦${investment.targetAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</button>`;
                         }
                     } else { // For Steady Income Plan and Long-Term Growth Plan
-                        borderColorClass = 'border-blue-500';
-                        statusText = `Active (Initial Value): ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                        if (investment.status === 'active') {
+                        // Display 'Withdrawn' status and gray border for withdrawn investments
+                        if (investment.status === 'withdrawn') {
+                             borderColorClass = 'border-gray-500'; // Gray border for withdrawn
+                             statusText = `Withdrawn: ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        } else { // Active Steady Income or Long-Term Growth
+                            borderColorClass = 'border-blue-500';
+                            statusText = `Active (Initial Value): ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                            // Only show withdraw button if the investment is active
                             buttonHtml = `<button data-id="${investment.id}" class="withdraw-investment-button w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">Withdraw ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</button>`;
                         }
                     }
@@ -845,8 +850,7 @@
                 const investment = currentUserData.investments[investmentIndex];
                 if (investment.status === 'matured') {
                     const redemptionAmount = investment.targetAmount;
-                    const oldBalance = currentUserData.userBalance;
-                    currentUserData.userBalance += redemptionAmount;
+                    currentUserData.userBalance += redemptionAmount; // Add to liquid balance
                     investment.status = 'redeemed'; // Mark as redeemed
 
                     recordTransaction('investmentRedeem', redemptionAmount, `Redeemed ${investment.name}`);
@@ -862,27 +866,27 @@
             }
         }
 
-        // Handles withdrawing from other investment plans
+        // Handles withdrawing from other investment plans to liquid balance
         function handleWithdrawInvestment(event) {
             const investmentId = event.target.dataset.id;
             const investmentIndex = currentUserData.investments.findIndex(inv => inv.id === investmentId);
 
             if (investmentIndex > -1) {
                 const investment = currentUserData.investments[investmentIndex];
-                // Only allow withdrawal if status is 'active'
-                if (investment.status === 'active') {
+                // Only allow withdrawal if status is 'active' for non-growth plans
+                if (investment.status === 'active' && (investment.planType === 'Steady Income Plan' || investment.planType === 'Long-Term Growth Plan')) {
                     const withdrawalAmount = investment.initialAmount; // Withdraw initial amount
-                    const oldBalance = currentUserData.userBalance;
-                    currentUserData.userBalance += withdrawalAmount;
+                    
+                    currentUserData.userBalance += withdrawalAmount; // Add to liquid balance
                     investment.status = 'withdrawn'; // Mark as withdrawn
 
                     recordTransaction('investmentWithdraw', withdrawalAmount, `Withdrew ${investment.name} to liquid balance`);
                     saveCurrentUserData(); // Save changes to localStorage
                     updateBalanceDisplay(); // Update liquid balance display
-                    renderInvestments(); // Re-render to remove withdrawn item
+                    renderInvestments(); // Re-render to update the list
                     showDashboardStatusMessage(`Successfully withdrew ₦${withdrawalAmount.toLocaleString('en-NG')} from your investment! Your liquid balance has been updated.`, 'success');
                 } else {
-                    showDashboardStatusMessage("This investment cannot be withdrawn.", "error");
+                    showDashboardStatusMessage("This investment cannot be withdrawn at this time.", "error");
                 }
             } else {
                 showDashboardStatusMessage("Investment not found.", "error");
@@ -976,7 +980,7 @@
                         amountColorClass = 'text-green-600';
                         break;
                     case 'investmentWithdraw':
-                        typeColorClass = 'text-red-600';
+                        typeColorClass = 'text-red-600'; // Could be different from actual withdrawal if it's investment withdrawal to liquid
                         amountSign = '+';
                         amountColorClass = 'text-green-600';
                         break;
@@ -1007,7 +1011,7 @@
                 const depositRequest = currentUserData.pendingDeposits[pendingIndex];
                 currentUserData.userBalance += depositRequest.amount;
 
-                recordTransaction('deposit', depositRequest.amount, `Deposit confirmed: ${depositRequest.amount.toLocaleString('en-NG')} from ${depositRequest.senderName}`);
+                recordTransaction('deposit', depositRequest.amount, `Deposit confirmed: ₦${depositRequest.amount.toLocaleString('en-NG')} from ${depositRequest.senderName}`);
                 
                 currentUserData.pendingDeposits.splice(pendingIndex, 1); // Remove from pending
                 saveCurrentUserData();
@@ -1041,6 +1045,7 @@
             const now = Date.now();
 
             // Process pending deposits
+            // Iterate backwards to safely remove elements during iteration
             for (let i = currentUserData.pendingDeposits.length - 1; i >= 0; i--) {
                 const deposit = currentUserData.pendingDeposits[i];
                 const timeRemaining = new Date(deposit.expectedApprovalTime).getTime() - now;
@@ -1052,7 +1057,7 @@
                     setTimeout(() => {
                         processDepositApproval(deposit.id);
                     }, timeRemaining);
-                    console.log(`Scheduled deposit approval for ${deposit.username} in ${timeRemaining / 1000} seconds.`);
+                    console.log(`Scheduled deposit approval for ${currentUserData.userName} in ${timeRemaining / 1000} seconds.`);
                 }
             }
 
@@ -1068,7 +1073,7 @@
                     setTimeout(() => {
                         processWithdrawalApproval(withdrawal.id);
                     }, timeRemaining);
-                    console.log(`Scheduled withdrawal approval for ${withdrawal.username} in ${timeRemaining / 1000} seconds.`);
+                    console.log(`Scheduled withdrawal approval for ${currentUserData.userName} in ${timeRemaining / 1000} seconds.`);
                 }
             }
         }
@@ -1126,7 +1131,7 @@
             const signupForm = document.getElementById('signupForm');
             const signupPhoneInput = document.getElementById('signupPhone');
             const signupEmailInput = document.getElementById('signupEmail');
-            const signupPasswordInput = document = document.getElementById('signupPassword');
+            const signupPasswordInput = document.getElementById('signupPassword');
             const signupPhoneError = document.getElementById('signupPhoneError');
             const signupEmailError = document.getElementById('signupEmailError');
             const signupPasswordError = document.getElementById('signupPasswordError');
@@ -1142,7 +1147,7 @@
             const depositModal = document.getElementById('depositModal');
             const withdrawModal = document.getElementById('withdrawModal');
             const historyModal = document.getElementById('historyModal');
-            const receiptModal = document.getElementById('receiptModal'); // New receipt modal
+            const receiptModal = document.getElementById('receiptModal');
 
             const depositAmountInput = document.getElementById('depositAmount');
             const senderAccountNameInput = document.getElementById('senderAccountName');
@@ -1151,7 +1156,7 @@
             const withdrawAmountInput = document.getElementById('withdrawAmount');
             const bankAccountNameInput = document.getElementById('bankAccountName');
             const bankAccountNumberInput = document.getElementById('bankAccountNumber');
-            const bankNameInput = document.getElementById('bankName'); // New bank name input
+            const bankNameInput = document.getElementById('bankName');
 
             const depositAmountError = document.getElementById('depositAmountError');
             const senderAccountNameError = document.getElementById('senderAccountNameError');
@@ -1160,7 +1165,7 @@
             const withdrawAmountError = document.getElementById('withdrawAmountError');
             const bankAccountNameError = document.getElementById('bankAccountNameError');
             const bankAccountNumberError = document.getElementById('bankAccountNumberError');
-            const bankNameError = document.getElementById('bankNameError'); // New bank name error
+            const bankNameError = document.getElementById('bankNameError');
 
 
             const cancelDepositButton = document.getElementById('cancelDeposit');
@@ -1170,18 +1175,18 @@
             const confirmWithdrawalButton = document.getElementById('confirmWithdrawal');
 
             const closeHistoryModalButton = document.getElementById('closeHistoryModal');
-            const downloadReceiptButton = document.getElementById('downloadReceiptButton'); // New
-            const closeReceiptModalButton = document.getElementById('closeReceiptModalButton'); // New
+            const downloadReceiptButton = document.getElementById('downloadReceiptButton');
+            const closeReceiptModalButton = document.getElementById('closeReceiptModalButton');
 
             const investButtons = document.querySelectorAll('.invest-button');
 
             // --- Initial Page Load & Authentication Check ---
             if (loggedInUsername) {
-                loadCurrentUserData(); // Load specific user's data
-                checkAndProcessPendingTransactionsOnLoad(); // Check and process any pending timers
+                loadCurrentUserData();
+                checkAndProcessPendingTransactionsOnLoad();
                 showDashboardPage();
             } else {
-                showHomePage(); // Start at the home page if not logged in
+                showHomePage();
             }
 
             // --- Login Form Submission ---
@@ -1217,7 +1222,7 @@
                         loggedInUsername = username;
                         localStorage.setItem('loggedInUser', loggedInUsername);
                         loadCurrentUserData();
-                        checkAndProcessPendingTransactionsOnLoad(); // Check pending for this user on login
+                        checkAndProcessPendingTransactionsOnLoad();
                         
                         showLoginStatusMessage('Login Successful! Redirecting...', 'success');
                         
@@ -1282,7 +1287,7 @@
                             userBalance: 0.00,
                             investments: [],
                             transactions: [],
-                            pendingDeposits: [], // Initialize pending arrays for new user
+                            pendingDeposits: [],
                             pendingWithdrawals: []
                         };
                         allUsers[email] = userData;
@@ -1358,13 +1363,12 @@
                         senderName: senderName,
                         accountNumber: transferAccountNumber,
                         date: new Date().toISOString(),
-                        expectedApprovalTime: new Date(expectedApprovalTime).toISOString() // Store future approval time
+                        expectedApprovalTime: new Date(expectedApprovalTime).toISOString()
                     };
                     currentUserData.pendingDeposits.unshift(newPendingDeposit);
-                    saveCurrentUserData(); // Save updated pending list for current user
+                    saveCurrentUserData();
                     console.log('Deposit request added to pending queue:', newPendingDeposit);
 
-                    // Set timer for automatic approval
                     setTimeout(() => {
                         processDepositApproval(newPendingDeposit.id);
                     }, DEPOSIT_DELAY_MS);
@@ -1380,7 +1384,7 @@
                 withdrawAmountInput.value = '';
                 bankAccountNameInput.value = '';
                 bankAccountNumberInput.value = '';
-                bankNameInput.value = ''; // Clear bank name
+                bankNameInput.value = '';
                 hideAllWithdrawalErrors();
             });
 
@@ -1392,7 +1396,7 @@
                 const amountToWithdraw = parseFloat(withdrawAmountInput.value);
                 const recipientAccountName = bankAccountNameInput.value.trim();
                 const recipientAccountNumber = bankAccountNumberInput.value.trim();
-                const recipientBankName = bankNameInput.value.trim(); // Get bank name
+                const recipientBankName = bankNameInput.value.trim();
 
                 let isValid = true;
                 hideAllWithdrawalErrors();
@@ -1421,7 +1425,7 @@
                     isValid = false;
                 }
                 
-                if (recipientBankName === '') { // Validate bank name
+                if (recipientBankName === '') {
                     bankNameError.classList.remove('hidden');
                     bankNameInput.classList.add('border-red-500');
                     isValid = false;
@@ -1437,7 +1441,7 @@
                         amount: amountToWithdraw,
                         bankAccountName: recipientAccountName,
                         bankAccountNumber: recipientAccountNumber,
-                        bankName: recipientBankName, // Store bank name
+                        bankName: recipientBankName,
                         date: new Date().toISOString(),
                         expectedApprovalTime: new Date(expectedApprovalTime).toISOString()
                     };
@@ -1445,7 +1449,6 @@
                     saveCurrentUserData();
                     console.log('Withdrawal request added to pending queue:', newPendingWithdrawal);
 
-                    // Set timer for automatic approval
                     setTimeout(() => {
                         processWithdrawalApproval(newPendingWithdrawal.id);
                     }, WITHDRAWAL_DELAY_MS);
@@ -1476,7 +1479,6 @@
             logoutButton.addEventListener('click', () => {
                 loggedInUsername = null;
                 localStorage.removeItem('loggedInUser');
-                // Reset currentUserData to a clean state for the next potential login
                 currentUserData = { userName: "Investor", userBalance: 0.00, investments: [], transactions: [], pendingDeposits: [], pendingWithdrawals: [] }; 
                 showHomePage();
             });
@@ -1562,7 +1564,7 @@
             withdrawAmountInput.addEventListener('input', hideAllWithdrawalErrors);
             bankAccountNameInput.addEventListener('input', hideAllWithdrawalErrors);
             bankAccountNumberInput.addEventListener('input', hideAllWithdrawalErrors);
-            bankNameInput.addEventListener('input', hideAllWithdrawalErrors); // Added for bank name
+            bankNameInput.addEventListener('input', hideAllWithdrawalErrors);
         });
     </script>
 </body>
