@@ -28,7 +28,7 @@
             0%, 100% { opacity: 1; }
             50% { opacity: .5; }
         }
-        /* Custom scrollbar for history modal */
+        /* Custom scrollbar for history panel */
         .overflow-y-scroll::-webkit-scrollbar {
             width: 8px;
         }
@@ -100,7 +100,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
+            z-index: 1000; /* Lower than panels now */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -195,6 +195,165 @@
         .grid .animate-on-scroll:nth-child(4) { transition-delay: 0.4s; }
         .grid .animate-on-scroll:nth-child(5) { transition-delay: 0.5s; }
         .grid .animate-on-scroll:nth-child(6) { transition-delay: 0.6s; }
+
+        /* Styles for the receipt structure when rendered for download */
+        /* These styles are applied to a temporary element for html2canvas */
+        .receipt-container-temp {
+            background-color: #2563eb; /* Blue-600 for background */
+            border-radius: 1rem; /* Rounded-2xl */
+            overflow: hidden; /* Ensures content stays within bounds */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Shadow effect */
+            width: 350px; /* Fixed width for consistent receipt size */
+            font-family: 'Inter', sans-serif; /* Ensure Inter font for the receipt */
+            color: #2d3748; /* Default text color */
+            position: absolute; /* Keep it off-screen */
+            left: -9999px;
+            top: -9999px;
+            z-index: -1; /* Ensure it's not visible */
+        }
+
+        .receipt-header-logo-temp {
+            background-color: #ffffff; /* White background */
+            padding: 1rem 1.5rem; /* px-6 py-4 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top-left-radius: 1rem; /* Only top for inner container */
+            border-top-right-radius: 1rem;
+        }
+
+        .receipt-amount-section-temp {
+            background-color: #1e3a8a; /* Blue-800 */
+            padding: 2rem 1.5rem; /* px-6 py-8 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+        }
+
+        .receipt-amount-text-temp {
+            font-weight: 800; /* font-extrabold */
+            font-size: 2.25rem; /* text-4xl */
+            line-height: 1;
+            margin-top: 0.5rem;
+        }
+
+        .receipt-details-section-temp {
+            background-color: #ffffff; /* White background */
+            padding: 1.5rem 1.5rem; /* p-6 sm:p-8 */
+            border-bottom-left-radius: 1rem; /* Only bottom for inner container */
+            border-bottom-right-radius: 1rem;
+            color: #2d3748; /* Gray-800 */
+            font-size: 0.875rem; /* text-sm */
+        }
+
+        .receipt-detail-item-temp {
+            margin-bottom: 1rem;
+        }
+
+        .receipt-detail-item-temp:last-child {
+            margin-bottom: 0;
+        }
+
+        .receipt-detail-label-temp {
+            font-weight: 500; /* font-medium */
+            color: #6b7280; /* gray-500 */
+            text-transform: uppercase;
+            font-size: 0.75rem; /* text-xs */
+        }
+
+        .receipt-detail-value-temp {
+            font-weight: 600; /* font-semibold */
+            margin-top: 0.25rem;
+            font-size: 0.875rem; /* text-sm */
+        }
+
+        /* SVG Chart Styles */
+        .chart-container {
+            width: 100%;
+            max-width: 600px; /* Limit chart width */
+            margin: 0 auto;
+            padding: 1rem;
+            background-color: #f8fafc; /* bg-gray-50 */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+            overflow: hidden; /* Hide overflowing parts of the animated line */
+        }
+
+        .chart-container svg {
+            width: 100%;
+            height: 200px;
+        }
+
+        .chart-line {
+            stroke: #2563eb; /* blue-600 */
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .chart-fill {
+            fill: url(#gradient);
+            opacity: 0.7;
+        }
+
+        .chart-axis-line {
+            stroke: #cbd5e1; /* gray-300 */
+            stroke-width: 1;
+        }
+
+        .chart-grid-line {
+            stroke: #e2e8f0; /* gray-200 */
+            stroke-width: 1;
+            stroke-dasharray: 2 2;
+        }
+
+        .chart-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            fill: #64748b; /* gray-500 */
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000; /* Ensure it's above other elements */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -204,14 +363,35 @@
         <button class="close-btn" id="closeMobileNav">&times;</button>
         <ul>
             <li><a href="#" onclick="closeMobileNavAndGoTo('#home')">Home</a></li>
+            <li><a href="#our-mission" onclick="closeMobileNavAndGoTo('#our-mission')">Our Mission</a></li>
             <li><a href="#how-we-make-money" onclick="closeMobileNavAndGoTo('#how-we-make-money')">How We Make Money</a></li>
-            <li><a href="#about-us" onclick="closeMobileNavAndGoTo('#about-us')">About Us</a></li>
+            <li><a href="#about-us" onclick="closeMobileNavAndGoTo('#about-us')">Why Invest</a></li>
             <li><a href="#how-it-works" onclick="closeMobileNavAndGoTo('#how-it-works')">How It Works</a></li>
+            <li><a href="#our-leadership" onclick="closeMobileNavAndGoTo('#our-leadership')">Our Leadership</a></li>
             <li><a href="#contact-us" onclick="closeMobileNavAndGoTo('#contact-us')">Contact Us</a></li>
         </ul>
         <div class="mobile-auth-buttons">
             <a href="#" class="bg-blue-600 text-white" onclick="closeMobileNavAndGoTo('#login')">Login</a>
             <a href="#" class="bg-green-600 text-white" onclick="closeMobileNavAndGoTo('#signup')">Sign Up</a>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal (Hidden by Default) -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Confirm Investment Withdrawal</h3>
+            <p class="text-gray-700 mb-6">Are you sure you want to withdraw your capital from this investment?</p>
+            <p class="text-red-600 font-semibold mb-6">
+                WARNING: This action will CANCEL your investment, and you will FORFEIT any potential profits. Only your initial capital will be returned to your liquid balance.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancelWithdrawalConfirm" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-5 rounded-lg transition-colors button-hover">
+                    Cancel
+                </button>
+                <button id="confirmWithdrawalAction" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-lg transition-colors button-hover">
+                    Confirm Withdrawal
+                </button>
+            </div>
         </div>
     </div>
 
@@ -234,9 +414,11 @@
                     <!-- Adjusted space-x to prevent wrapping on desktop -->
                     <ul class="flex items-center space-x-4">
                         <li><a href="#" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium" onclick="showHomePage()">Home</a></li>
+                        <li><a href="#our-mission" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">Our Mission</a></li>
                         <li><a href="#how-we-make-money" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">How We Make Money</a></li>
-                        <li><a href="#about-us" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">About Us</a></li>
+                        <li><a href="#about-us" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">Why Invest</a></li>
                         <li><a href="#how-it-works" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">How It Works</a></li>
+                        <li><a href="#our-leadership" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">Our Leadership</a></li>
                         <li><a href="#contact-us" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">Contact Us</a></li>
                         <li><a href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 button-hover" onclick="showLoginPage()">Login</a></li>
                         <li><a href="#" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 button-hover" onclick="showSignupPage()">Sign Up</a></li>
@@ -260,7 +442,30 @@
             </div>
         </section>
 
-        <!-- How We Make Money Section (NEW) -->
+        <!-- Our Mission Section -->
+        <section id="our-mission" class="py-16 md:py-24 bg-teal-700 text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-8 animate-on-scroll">Our Mission: Fueling Growth Together</h2>
+                <div class="max-w-4xl mx-auto space-y-6 text-lg md:text-xl leading-relaxed">
+                    <p class="animate-on-scroll">
+                        At Thx Oil And Gas Investment, we are committed to sustainable wealth creation through strategic energy ventures.
+                        We utilize your investments primarily for the **drilling and development of new oil wells**.
+                        These are high-potential projects carefully selected by our expert team, ensuring a foundation for robust returns.
+                    </p>
+                    <p class="animate-on-scroll">
+                        Our operational excellence in the energy sector allows us to generate significant profits.
+                        A substantial portion, specifically **30% of the profits** generated from these successful ventures,
+                        is directly distributed back to our valued investors. This creates a mutually prosperous partnership,
+                        allowing you to benefit from the thriving global energy market.
+                    </p>
+                    <p class="animate-on-scroll font-semibold">
+                        Invest with confidence, knowing your capital is fueling tangible, income-generating assets in the heart of the oil and gas industry.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How We Make Money Section -->
         <section id="how-we-make-money" class="py-16 md:py-24 bg-blue-900 text-white">
             <div class="container mx-auto px-4 text-center">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12 animate-on-scroll">How Thx Generates Profit</h2>
@@ -331,25 +536,46 @@
                 <p class="mt-12 text-lg max-w-3xl mx-auto opacity-80 animate-on-scroll">
                     Our expert team guides you through the process, ensuring a seamless and transparent investment experience. We provide detailed insights and support every step of the way.
                 </p>
+                <p class="mt-8 text-lg max-w-3xl mx-auto opacity-80 animate-on-scroll font-semibold">
+                    Enjoy the flexibility of your investments! You can withdraw your initial capital from steady and long-term plans at any time, though early withdrawal means foregoing potential profits. For your liquid balance, withdrawals to your bank as small as ₦500 are supported.
+                </p>
+            </div>
+        </section>
+
+        <!-- Our Leadership Section -->
+        <section id="our-leadership" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-12 animate-on-scroll">Our Leadership</h2>
+                <div class="max-w-xl mx-auto bg-gray-100 p-8 rounded-xl shadow-lg transition-transform duration-300 card-hover animate-on-scroll">
+                    <img src="https://placehold.co/150x150/e2e8f0/64748b?text=CEO" alt="Engr. Onuzurike Emmanuel Onuzurike" class="rounded-full mx-auto mb-6 shadow-md border-4 border-amber-500">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Engr. Onuzurike Emmanuel Onuzurike</h3>
+                    <p class="text-amber-600 text-xl font-semibold mb-4">Chief Executive Officer</p>
+                    <p class="text-gray-700 leading-relaxed">
+                        Engr. Onuzurike Emmanuel Onuzurike is the visionary leader at the helm of Thx Oil And Gas Investment.
+                        With extensive experience and a deep understanding of the energy sector, Engr. Onuzurike is committed
+                        to driving innovation, ensuring sustainable growth, and fostering a transparent and profitable environment
+                        for all our investors.
+                    </p>
+                </div>
             </div>
         </section>
 
         <!-- Call to Action / Sign Up Section -->
-        <section id="signup-home" class="py-16 md:py-24 bg-white">
+        <section id="signup-home" class="py-16 md:py-24 bg-gray-800 text-white">
             <div class="container mx-auto px-4 text-center">
                 <h2 class="text-3xl md:text-4xl font-bold mb-8 animate-on-scroll">Ready to Grow Your Portfolio?</h2>
-                <p class="text-xl md:text-2xl mb-12 max-w-3xl mx-auto text-gray-700 animate-on-scroll">
+                <p class="text-xl md:text-2xl mb-12 max-w-3xl mx-auto opacity-90 animate-on-scroll">
                     Join thousands of savvy investors who are leveraging the power of oil and gas. Sign up today and take the first step towards a prosperous future!
                 </p>
                 <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 px-12 rounded-full text-2xl md:text-3xl shadow-xl transform transition-all duration-300 hover:scale-105 active:scale-95 button-hover animate-on-scroll" onclick="showSignupPage()">
                     Sign Up Now
                 </a>
-                <p class="mt-8 text-gray-600 animate-on-scroll">Secure, transparent, and built for your success.</p>
+                <p class="mt-8 text-gray-400 animate-on-scroll">Secure, transparent, and built for your success.</p>
             </div>
         </section>
 
-        <!-- Contact Us Section (NEW) -->
-        <section id="contact-us" class="py-16 md:py-24 bg-gray-800 text-white">
+        <!-- Contact Us Section -->
+        <section id="contact-us" class="py-16 md:py-24 bg-gray-900 text-white">
             <div class="container mx-auto px-4 text-center">
                 <h2 class="text-3xl md:text-4xl font-bold mb-8 animate-on-scroll">Get In Touch With Us</h2>
                 <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90 animate-on-scroll">
@@ -437,6 +663,15 @@
         <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md animate-on-scroll">
             <h2 class="text-3xl font-bold text-center mb-8 text-gray-900">Create Your Account</h2>
             <form id="signupForm" class="space-y-6">
+                <!-- Username Input -->
+                <div>
+                    <label for="signupUsername" class="block text-gray-700 text-sm font-semibold mb-2">Username</label>
+                    <input type="text" id="signupUsername" name="username" placeholder="Choose a unique username"
+                           class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors duration-200"
+                           required>
+                    <p id="signupUsernameError" class="text-red-500 text-xs mt-1 hidden">Please enter a username.</p>
+                </div>
+
                 <!-- Phone Number Input -->
                 <div>
                     <label for="signupPhone" class="block text-gray-700 text-sm font-semibold mb-2">Nigerian Phone Number</label>
@@ -530,156 +765,215 @@
                         <button id="withdrawToBankButton" class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
                             Withdraw to Bank
                         </button>
+                         <!-- New Withdraw Investment Button -->
+                        <button id="withdrawInvestmentButton" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
+                            Withdraw Investment
+                        </button>
                         <button id="historyButton" class="w-full bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
                             History
                         </button>
                     </div>
                 </div>
-                <!-- Deposit Modal -->
-                <!-- Increased z-index to ensure it overlays all content -->
-                <div id="depositModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999] p-4">
-                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md relative mx-auto">
-                        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-gray-900 text-center">Deposit Funds</h3>
-                        <p class="text-gray-700 text-sm sm:text-base mb-6 text-center">Transfer money to the account details below:</p>
+            </section>
 
-                        <div class="space-y-2 sm:space-y-3 mb-6 p-3 sm:p-4 bg-gray-100 rounded-xl text-center border border-gray-200">
-                            <p class="text-base sm:text-lg font-semibold">Account Number: <span id="depositAccountNumberDisplay" class="font-bold text-blue-600 text-xl sm:text-2xl"></span></p>
-                            <p class="text-sm sm:text-lg font-semibold">Bank: <span id="depositBankNameDisplay" class="font-bold text-gray-800 text-base sm:text-xl"></span></p>
-                        </div>
+            <!-- Statistics Panel -->
+            <section id="statisticsPanel" class="bg-white p-6 md:p-8 rounded-xl shadow-xl mt-8 animate-on-scroll">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-900 text-center">Oil & Gas Market Trends (Simulated)</h2>
+                <div class="chart-container">
+                    <svg id="oilGasChart" viewBox="0 0 400 200">
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.8"/>
+                                <stop offset="100%" stop-color="#2563eb" stop-opacity="0.1"/>
+                            </linearGradient>
+                        </defs>
 
-                        <p class="text-gray-700 text-sm sm:text-base mb-4 text-center">After transferring, please provide details below:</p>
+                        <!-- Grid lines (horizontal) -->
+                        <line x1="40" y1="50" x2="380" y2="50" class="chart-grid-line" />
+                        <line x1="40" y1="100" x2="380" y2="100" class="chart-grid-line" />
+                        <line x1="40" y1="150" x2="380" y2="150" class="chart-grid-line" />
 
-                        <!-- Deposit Amount Input -->
-                        <div class="mb-4">
-                            <label for="depositAmount" class="block text-gray-700 text-sm font-semibold mb-2">Amount Deposited (₦)</label>
-                            <input type="number" id="depositAmount" placeholder="e.g., 5000"
-                                   class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors duration-200 text-base"
-                                   min="1" required>
-                            <p id="depositAmountError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid amount (minimum ₦1).</p>
-                        </div>
+                        <!-- Axis lines -->
+                        <line x1="40" y1="20" x2="40" y2="180" class="chart-axis-line" />
+                        <line x1="40" y1="180" x2="380" y2="180" class="chart-axis-line" />
 
-                        <!-- Account Number Used for Transfer Input -->
-                        <div class="mb-6">
-                            <label for="transferAccountNumber" class="block text-gray-700 text-sm font-semibold mb-2">Your Account Number (used for transfer)</label>
-                            <!-- Adjusted placeholder for better fit and visibility -->
-                            <input type="tel" id="transferAccountNumber" placeholder="10-digit account number"
-                                   class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors duration-200 text-base"
-                                   pattern="\d{10}"
-                                   title="Please enter a 10-digit account number."
-                                   required>
-                            <p id="transferAccountNumberError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid 10-digit account number.</p>
-                        </div>
+                        <!-- Labels Y-axis -->
+                        <text x="30" y="155" text-anchor="end" class="chart-label">Low</text>
+                        <text x="30" y="105" text-anchor="end" class="chart-label">Medium</text>
+                        <text x="30" y="55" text-anchor="end" class="chart-label">High</text>
 
-                        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
-                            <!-- Refurbished Cancel button with full styling -->
-                            <button id="cancelDeposit" class="w-full sm:w-auto bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
-                                Cancel
-                            </button>
-                            <!-- Refurbished Confirm Deposit button with full styling -->
-                            <button id="confirmDeposit" class="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
-                                Confirm Deposit
-                            </button>
-                        </div>
-                        <p class="text-center text-xs sm:text-sm text-gray-600 mt-4">
-                            Having trouble? Contact us: <a href="https://wa.me/2348037676772" target="_blank" class="text-blue-500 hover:underline">08037676772 <i class="fab fa-whatsapp text-green-500"></i></a> (available on WhatsApp)
-                        </p>
-                    </div>
+                        <!-- Labels X-axis (will be dynamic or fixed time points) -->
+                        <text x="40" y="195" text-anchor="middle" class="chart-label">Past</text>
+                        <text x="210" y="195" text-anchor="middle" class="chart-label">Current</text>
+                        <text x="380" y="195" text-anchor="middle" class="chart-label">Future</text>
+
+                        <polyline id="chartLine" points="" class="chart-line" />
+                        <polygon id="chartFill" points="" class="chart-fill" />
+                    </svg>
+                    <p class="text-center text-gray-600 text-sm mt-2">
+                        Simulated real-time price fluctuations for Oil, Gas, and Fuel in Nigeria.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Deposit Panel -->
+            <section id="depositPanel" class="bg-white p-6 md:p-8 rounded-xl shadow-xl mt-8 hidden animate-on-scroll">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 text-center">Deposit Funds</h2>
+                <p class="text-gray-700 text-sm sm:text-base mb-6 text-center">Transfer money to the account details below:</p>
+
+                <div class="space-y-2 sm:space-y-3 mb-6 p-3 sm:p-4 bg-gray-100 rounded-xl text-center border border-gray-200">
+                    <p class="text-base sm:text-lg font-semibold">Account Number: <span id="depositAccountNumberDisplay" class="font-bold text-blue-600 text-xl sm:text-2xl"></span></p>
+                    <p class="text-sm sm:text-lg font-semibold">Bank: <span id="depositBankNameDisplay" class="font-bold text-gray-800 text-base sm:text-xl"></span></p>
                 </div>
 
-                <!-- Withdraw to Bank Modal -->
-                <!-- Increased z-index to ensure it overlays all content -->
-                <div id="withdrawModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999] p-4">
-                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md relative mx-auto">
-                        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-gray-900 text-center">Withdraw Funds to Bank</h3>
-                        <p class="text-gray-700 text-sm sm:text-base mb-6 text-center">Enter the amount you wish to withdraw and your bank details.</p>
+                <p class="text-gray-700 text-sm sm:text-base mb-4 text-center">After transferring, please provide details below:</p>
 
-                        <!-- Withdraw Amount Input -->
-                        <div class="mb-4">
-                            <label for="withdrawAmount" class="block text-gray-700 text-sm font-semibold mb-2">Amount to Withdraw (₦)</label>
-                            <input type="number" id="withdrawAmount" placeholder="e.g., 5000"
-                                   class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-base"
-                                   min="1" required>
-                            <p id="withdrawAmountError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid amount.</p>
-                        </div>
-
-                        <!-- Bank Account Name Input -->
-                        <div class="mb-4">
-                            <label for="bankAccountName" class="block text-gray-700 text-sm font-semibold mb-2">Bank Account Name</label>
-                            <input type="text" id="bankAccountName" placeholder="e.g., Your Full Name"
-                                   class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-base"
-                                   required>
-                            <p id="bankAccountNameError" class="text-red-500 text-xs mt-1 hidden">Please enter the bank account name.</p>
-                        </div>
-
-                        <!-- Bank Account Number Input -->
-                        <div class="mb-6">
-                            <label for="bankAccountNumber" class="block text-gray-700 text-sm font-semibold mb-2">Bank Account Number</label>
-                            <input type="tel" id="bankAccountNumber" placeholder="Enter your 10-digit account number"
-                                   class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-base"
-                                   pattern="\d{10}"
-                                   title="Please enter a 10-digit bank account number."
-                                   required>
-                            <p id="bankAccountNumberError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid 10-digit account number.</p>
-                        </div>
-                        <div class="mb-6">
-                            <label for="bankName" class="block text-gray-700 text-sm font-semibold mb-2">Bank Name</label>
-                            <input type="text" id="bankName" placeholder="e.g., Access Bank"
-                                   class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-base"
-                                   required>
-                            <p id="bankNameError" class="text-red-500 text-xs mt-1 hidden">Please enter the bank name.</p>
-                        </div>
-
-                        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
-                            <button id="cancelWithdrawal" class="w-full sm:w-auto bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
-                                Cancel
-                            </button>
-                            <button id="confirmWithdrawal" class="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
-                                Confirm Withdrawal
-                            </button>
-                        </div>
-                        <p class="text-center text-xs sm:text-sm text-gray-600 mt-4">
-                            Having trouble? Contact us: <a href="https://wa.me/2348037676772" target="_blank" class="text-blue-500 hover:underline">08037676772 <i class="fab fa-whatsapp text-green-500"></i></a> (available on WhatsApp)
-                        </p>
-                    </div>
+                <!-- Deposit Amount Input -->
+                <div class="mb-4">
+                    <label for="depositAmount" class="block text-gray-700 text-sm font-semibold mb-2">Amount Deposited (₦)</label>
+                    <input type="number" id="depositAmount" placeholder="e.g., 5000"
+                           class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors duration-200 text-base"
+                           min="1" required>
+                    <p id="depositAmountError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid amount (minimum ₦1).</p>
                 </div>
 
-                <!-- Transaction History Modal -->
-                <div id="historyModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md sm:max-w-2xl relative mx-auto">
-                        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-gray-900 text-center">Transaction History</h3>
-                        <div id="historyList" class="max-h-80 sm:max-h-96 overflow-y-scroll border border-gray-200 p-3 sm:p-4 rounded-xl bg-gray-50">
-                            <!-- Transaction items will be rendered here -->
-                        </div>
-                        <div class="flex justify-end mt-6">
-                            <button id="closeHistoryModal" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-5 rounded-lg transition-colors button-hover">
-                                Close
-                            </button>
-                        </div>
-                    </div>
+                <!-- Your Account Name (NEW) -->
+                <div class="mb-4">
+                    <label for="senderAccountName" class="block text-gray-700 text-sm font-semibold mb-2">Your Account Name (used for transfer)</label>
+                    <input type="text" id="senderAccountName" placeholder="e.g., John Doe"
+                           class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors duration-200 text-base"
+                           required>
+                    <p id="senderAccountNameError" class="text-red-500 text-xs mt-1 hidden">Please enter your account name.</p>
                 </div>
 
-                <!-- Receipt Modal (New) -->
-                <div id="receiptModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md relative mx-auto">
-                        <h3 class="text-xl sm:text-2xl font-bold mb-6 text-gray-900 text-center">Withdrawal Receipt</h3>
-                        <div id="receiptContent" class="border border-gray-200 p-4 sm:p-6 rounded-xl bg-gray-50 text-gray-800 text-sm sm:text-base">
-                            <!-- Receipt content will be dynamically inserted here -->
-                        </div>
-                        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
-                            <button id="downloadReceiptButton" class="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-2 px-5 rounded-lg transition-colors button-hover hover:shadow-md">
-                                Download Receipt (PNG)
-                            </button>
-                            <button id="closeReceiptModalButton" class="w-full sm:w-auto bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-5 rounded-lg transition-colors button-hover">
-                                Close
-                            </button>
-                        </div>
-                    </div>
+                <!-- Your Bank Name (NEW) -->
+                <div class="mb-4">
+                    <label for="senderBankName" class="block text-gray-700 text-sm font-semibold mb-2">Your Bank Name (used for transfer)</label>
+                    <input type="text" id="senderBankName" placeholder="e.g., Zenith Bank"
+                           class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors duration-200 text-base"
+                           required>
+                    <p id="senderBankNameError" class="text-red-500 text-xs mt-1 hidden">Please enter your bank name.</p>
                 </div>
 
-                <!-- Status Message (for all operations: deposit, withdraw, invest, redeem) -->
-                <div id="dashboardStatusMessage" class="hidden mt-6 px-4 py-3 rounded-lg relative" role="alert">
-                    <span class="block sm:inline text-sm sm:text-base" id="dashboardStatusText"></span>
-                    <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentNode.classList.add('hidden')">
+                <!-- Account Number Used for Transfer Input (Existing) -->
+                <div class="mb-6">
+                    <label for="transferAccountNumber" class="block text-gray-700 text-sm font-semibold mb-2">Your Account Number (used for transfer)</label>
+                    <input type="tel" id="transferAccountNumber" placeholder="10-digit account number"
+                           class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors duration-200 text-base"
+                           pattern="\d{10}"
+                           title="Please enter a 10-digit account number."
+                           required>
+                    <p id="transferAccountNumberError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid 10-digit account number.</p>
+                </div>
+
+                <!-- Receipt Upload (NEW) -->
+                <div class="mb-6">
+                    <label for="depositReceipt" class="block text-gray-700 text-sm font-semibold mb-2">Upload Proof of Payment (PNG File)</label>
+                    <input type="file" id="depositReceipt" accept="image/png"
+                           class="w-full text-gray-700 border-2 border-gray-300 rounded-lg p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer transition-colors duration-200">
+                    <p id="depositReceiptError" class="text-red-500 text-xs mt-1 hidden">Please upload a PNG file.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
+                    <button id="cancelDepositPanel" class="w-full sm:w-auto bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
+                        Cancel
+                    </button>
+                    <button id="confirmDeposit" class="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
+                        Confirm Deposit
+                    </button>
+                </div>
+                <p class="text-center text-xs sm:text-sm text-gray-600 mt-4">
+                    Having trouble? Contact us: <a href="https://wa.me/2348037676772" target="_blank" class="text-blue-500 hover:underline">08037676772 <i class="fab fa-whatsapp text-green-500"></i></a> (available on WhatsApp)
+                </p>
+            </section>
+
+            <!-- Withdraw Panel -->
+            <section id="withdrawPanel" class="bg-white p-6 md:p-8 rounded-xl shadow-xl mt-8 hidden animate-on-scroll">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 text-center">Withdraw Funds to Bank</h2>
+                <p class="text-gray-700 text-sm sm:text-base mb-6 text-center">Enter the amount you wish to withdraw and your bank details.</p>
+
+                <!-- Withdraw Amount Input -->
+                <div class="mb-4">
+                    <label for="withdrawAmount" class="block text-gray-700 text-sm font-semibold mb-2">Amount to Withdraw (₦)</label>
+                    <input type="number" id="withdrawAmount" placeholder="e.g., 5000"
+                           class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-base"
+                           min="500" required>
+                    <p id="withdrawAmountError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid amount (minimum ₦500).</p>
+                </div>
+
+                <!-- Bank Account Name Input -->
+                <div class="mb-4">
+                    <label for="bankAccountName" class="block text-gray-700 text-sm font-semibold mb-2">Bank Account Name</label>
+                    <input type="text" id="bankAccountName" placeholder="e.g., Your Full Name"
+                           class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-base"
+                           required>
+                    <p id="bankAccountNameError" class="text-red-500 text-xs mt-1 hidden">Please enter the bank account name.</p>
+                </div>
+
+                <!-- Bank Account Number Input -->
+                <div class="mb-6">
+                    <label for="bankAccountNumber" class="block text-gray-700 text-sm font-semibold mb-2">Bank Account Number</label>
+                    <input type="tel" id="bankAccountNumber" placeholder="Enter your 10-digit account number"
+                           class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-base"
+                           pattern="\d{10}"
+                           title="Please enter a 10-digit bank account number."
+                           required>
+                    <p id="bankAccountNumberError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid 10-digit account number.</p>
+                </div>
+                <div class="mb-6">
+                    <label for="bankName" class="block text-gray-700 text-sm font-semibold mb-2">Bank Name</label>
+                    <input type="text" id="bankName" placeholder="e.g., Access Bank"
+                           class="w-full px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-base"
+                           required>
+                    <p id="bankNameError" class="text-red-500 text-xs mt-1 hidden">Please enter the bank name.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
+                    <button id="cancelWithdrawalPanel" class="w-full sm:w-auto bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
+                        Cancel
+                    </button>
+                    <button id="confirmWithdrawal" class="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
+                        Confirm Withdrawal
+                    </button>
+                </div>
+                <p class="text-center text-xs sm:text-sm text-gray-600 mt-4">
+                    Having trouble? Contact us: <a href="https://wa.me/2348037676772" target="_blank" class="text-blue-500 hover:underline">08037676772 <i class="fab fa-whatsapp text-green-500"></i></a> (available on WhatsApp)
+                </p>
+            </section>
+
+             <!-- Withdraw Investment Panel (NEW) -->
+            <section id="withdrawInvestmentPanel" class="bg-white p-6 md:p-8 rounded-xl shadow-xl mt-8 hidden animate-on-scroll">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 text-center">Withdraw Investment Capital</h2>
+                <p class="text-gray-700 text-sm sm:text-base mb-6 text-center">Select an investment below to withdraw its initial capital. This will cancel the investment and forfeit any profits.</p>
+                <div id="investmentsToWithdrawList" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-80 sm:max-h-96 overflow-y-scroll border border-gray-200 p-3 sm:p-4 rounded-xl bg-gray-50">
+                    <!-- Investment cards for withdrawal will be rendered here -->
+                    <p class="text-center text-gray-500 col-span-full" id="noInvestmentsToWithdrawMessage">You have no active investments to withdraw.</p>
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button id="closeWithdrawInvestmentPanel" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-5 rounded-lg transition-colors button-hover">
+                        Close
+                    </button>
+                </div>
+            </section>
+
+
+            <!-- Transaction History Panel -->
+            <section id="historyPanel" class="bg-white p-6 md:p-8 rounded-xl shadow-xl mt-8 hidden animate-on-scroll">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 text-center">Transaction History</h2>
+                <div id="historyList" class="max-h-80 sm:max-h-96 overflow-y-scroll border border-gray-200 p-3 sm:p-4 rounded-xl bg-gray-50">
+                    <!-- Transaction items will be rendered here -->
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button id="closeHistoryPanel" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-5 rounded-lg transition-colors button-hover">
+                        Close History
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Status Message (for all operations: deposit, withdraw, invest, redeem) -->
+            <div id="dashboardStatusMessage" class="hidden mt-6 px-4 py-3 rounded-lg relative" role="alert">
+                <span class="block sm:inline text-sm sm:text-base" id="dashboardStatusText"></span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentNode.classList.add('hidden')">
                         <svg class="fill-current h-6 w-6" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.15a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
                 </span>
                 </div>
@@ -723,10 +1017,10 @@
                             Invest <span class="font-bold text-base sm:text-lg">₦2,000</span>
                         </p>
                         <p class="text-gray-700 text-sm sm:text-base mb-4">
-                            Target Return: <span class="font-bold text-base sm:text-lg text-green-700">₦60,000</span> in 30 Days
+                            Target Return: <span class="font-bold text-base sm:text-lg text-green-700">₦15,000</span> in 30 Days
                         </p>
                         <p class="text-gray-600 text-xs sm:text-sm mb-6">
-                            A fast-paced plan returning ₦2,000 daily for 30 days, perfect for quick capital turnover.
+                            A fast-paced plan returning ₦500 daily for 30 days, perfect for quick capital turnover.
                         </p>
                         <button class="invest-button w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg"
                                 data-plan-name="Quick Return Plan" data-min-investment="2000">
@@ -770,6 +1064,25 @@
                             Invest Now
                         </button>
                     </div>
+
+                    <!-- Plan 5: Mega Oil Prospector Plan (NEW) -->
+                    <div class="bg-gray-100 p-5 sm:p-6 rounded-xl shadow-md border-t-4 border-indigo-500 transition-transform duration-300 card-hover">
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold mb-3 text-indigo-600">Mega Oil Prospector Plan</h3>
+                        <p class="text-gray-700 text-sm sm:text-base mb-2">
+                            Minimum Investment: <span class="font-bold text-base sm:text-lg">₦5,000,000</span>
+                        </p>
+                        <p class="text-gray-700 text-sm sm:text-base mb-4">
+                            Target Return: <span class="font-bold text-base sm:text-lg text-green-700">₦7,500,000</span> in 180 Days
+                        </p>
+                        <p class="text-gray-600 text-xs sm:text-sm mb-6">
+                            A premier plan for serious investors seeking substantial returns from large-scale oil well drilling projects over 6 months.
+                        </p>
+                        <button class="invest-button w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg"
+                                data-plan-name="Mega Oil Prospector Plan" data-min-investment="5000000" data-term-days="180" data-profit-amount="2500000">
+                            Invest Now
+                        </button>
+                    </div>
+
                 </div>
             </section>
         </main>
@@ -797,20 +1110,84 @@
         const RAPID_GROWTH_TARGET_AMOUNT = 365000;
 
         // Quick Return Plan constants
-        const QUICK_RETURN_DAILY_ADDITION = 2000;
+        const QUICK_RETURN_DAILY_ADDITION = 500;
         const QUICK_RETURN_DURATION_DAYS = 30;
-        const QUICK_RETURN_TARGET_AMOUNT = QUICK_RETURN_DAILY_ADDITION * QUICK_RETURN_DURATION_DAYS;
+        const QUICK_RETURN_TARGET_AMOUNT = QUICK_RETURN_DAILY_ADDITION * QUICK_RETURN_DURATION_DAYS; // Recalculated for 15,000
 
         // Simulated delay constants (in milliseconds)
-        const DEPOSIT_DELAY_MS = 30 * 60 * 1000;
-        const WITHDRAWAL_DELAY_MS = 15 * 60 * 1000; 
-        const PROCESS_DELAY_MS = 2 * 1000;
+        const DEPOSIT_DELAY_MS = 30 * 60 * 1000; // 30 minutes
+        const WITHDRAWAL_DELAY_MS = 15 * 60 * 1000; // 15 minutes
+        const PROCESS_DELAY_MS = 2 * 1000; // Small delay for UI feedback (2 seconds)
 
         // Dynamic Deposit Account Details
         const depositAccounts = [
             { account: '9063804954', bank: 'Moremonee' },
             { account: '6111385794', bank: 'Moniepoint' }
         ];
+
+        // --- Chart Animation Variables ---
+        const CHART_WIDTH = 400;
+        const CHART_HEIGHT = 200;
+        const PADDING_LEFT = 40;
+        const PADDING_BOTTOM = 20;
+        const NUM_POINTS = 60; // More points for smoother animation
+        const ANIMATION_SPEED = 1000 / 30; // ~30 frames per second
+        let chartData = [];
+        let animationFrameId; // To store requestAnimationFrame ID
+
+        // Initialize chart data with some plausible-ish values
+        function initializeChartData() {
+            chartData = [];
+            let lastValue = 100; // Starting around medium Y value (100 is center of 0-200)
+            for (let i = 0; i < NUM_POINTS; i++) {
+                // Simulate price fluctuations: small random step, tending slightly up or down
+                const change = (Math.random() - 0.5) * 20; // -10 to +10
+                lastValue = Math.max(20, Math.min(170, lastValue + change)); // Keep values within bounds
+                chartData.push(lastValue);
+            }
+        }
+
+        function updateChartData() {
+            // Shift data left, add new point on the right
+            chartData.shift();
+            let lastValue = chartData[chartData.length - 1];
+            // Introduce more varied changes for "spiking up and down"
+            const randomFactor = Math.random();
+            let change;
+            if (randomFactor < 0.2) { // 20% chance for a larger spike/dip
+                change = (Math.random() - 0.5) * 40; // -20 to +20
+            } else { // 80% chance for smaller fluctuation
+                change = (Math.random() - 0.5) * 15; // -7.5 to +7.5
+            }
+            lastValue = Math.max(20, Math.min(170, lastValue + change)); // Keep values within bounds (SVG Y-coordinates)
+            chartData.push(lastValue);
+        }
+
+        function drawChart() {
+            const chartLine = document.getElementById('chartLine');
+            const chartFill = document.getElementById('chartFill');
+            if (!chartLine || !chartFill) return; // Exit if elements not found (e.g., not on dashboard page)
+
+            let pointsString = "";
+            for (let i = 0; i < NUM_POINTS; i++) {
+                const x = PADDING_LEFT + (i / (NUM_POINTS - 1)) * (CHART_WIDTH - PADDING_LEFT - 20); // x-coordinate, scale to width
+                const y = chartData[i]; // y-coordinate (already scaled to SVG height)
+                pointsString += `${x},${y} `;
+            }
+
+            chartLine.setAttribute('points', pointsString.trim());
+            chartFill.setAttribute('points', `${PADDING_LEFT},${CHART_HEIGHT - PADDING_BOTTOM} ${pointsString.trim()} ${CHART_WIDTH - 20},${CHART_HEIGHT - PADDING_BOTTOM}`);
+        }
+
+        let lastFrameTime = 0;
+        function animateChart(currentTime) {
+            if (currentTime - lastFrameTime > ANIMATION_SPEED) {
+                updateChartData();
+                drawChart();
+                lastFrameTime = currentTime;
+            }
+            animationFrameId = requestAnimationFrame(animateChart);
+        }
 
         // --- Helper function for button state during processing ---
         function setButtonProcessingState(button, isProcessing, originalText) {
@@ -835,12 +1212,18 @@
             document.querySelectorAll('.page-section').forEach(page => {
                 page.style.display = 'none';
             });
+             // Stop chart animation when leaving dashboard
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
         }
 
         function closeMobileNavAndGoTo(hash) {
-            document.getElementById('mobileNavOverlay').classList.add('hidden'); // Ensure it hides
-            document.getElementById('mobileNavOverlay').classList.remove('open');
+            document.getElementById('mobileNavOverlay').classList.remove('open'); // Start transition
+            // Use setTimeout to add 'hidden' class after transition completes
             setTimeout(() => {
+                document.getElementById('mobileNavOverlay').classList.add('hidden'); // Ensure it hides
                 if (hash === '#home') showHomePage();
                 else if (hash === '#login') showLoginPage();
                 else if (hash === '#signup') showSignupPage();
@@ -850,7 +1233,7 @@
                         window.location.hash = hash;
                     }, 100);
                 }
-            }, 300);
+            }, 300); // Match this duration with the CSS transition duration for opacity/visibility
         }
 
 
@@ -878,9 +1261,11 @@
             document.getElementById('signupPage').style.display = 'flex';
             history.pushState(null, '', '#signup');
             document.getElementById('signupForm').reset();
+            document.getElementById('signupUsername').classList.remove('border-red-500'); // New: clear username error
             document.getElementById('signupPhone').classList.remove('border-red-500');
             document.getElementById('signupEmail').classList.remove('border-red-500');
             document.getElementById('signupPassword').classList.remove('border-red-500');
+            document.getElementById('signupUsernameError').classList.add('hidden'); // New: hide username error
             document.getElementById('signupPhoneError').classList.add('hidden');
             document.getElementById('signupEmailError').classList.add('hidden');
             document.getElementById('signupPasswordError').classList.add('hidden');
@@ -896,11 +1281,16 @@
             if (loggedInUsername && allUsers[loggedInUsername]) {
                 loadCurrentUserData();
                 checkAndProcessPendingTransactionsOnLoad();
-                document.getElementById('accountName').textContent = `Welcome, ${currentUserData.userName}!`;
+                // Ensure userName is correctly displayed on dashboard
+                document.getElementById('accountName').textContent = `Welcome, ${currentUserData.username || 'Investor'}!`; // Use 'username' property
                 updateBalanceDisplay();
                 updateTotalInvestmentValueDisplay(); 
                 applyDailyGrowth();
                 renderInvestments();
+
+                // Start chart animation when showing dashboard
+                initializeChartData();
+                animateChart();
             } else {
                 showLoginPage();
             }
@@ -925,9 +1315,11 @@
                 currentUserData = allUsers[loggedInUsername];
                 if (!currentUserData.pendingDeposits) currentUserData.pendingDeposits = [];
                 if (!currentUserData.pendingWithdrawals) currentUserData.pendingWithdrawals = [];
+                // Ensure 'username' property exists, default if not
+                if (!currentUserData.username) currentUserData.username = loggedInUsername.includes('@') ? loggedInUsername.split('@')[0] : loggedInUsername;
             } else {
                 currentUserData = {
-                    userName: "Investor",
+                    username: "Investor", // Default if not found or new
                     userBalance: 0.00,
                     investments: [],
                     transactions: [],
@@ -945,7 +1337,7 @@
         }
 
         // --- Common Dashboard Helper Functions (Adapted to use currentUserData) ---
-        function recordTransaction(type, amount, description) {
+        function recordTransaction(type, amount, description, details = {}) {
             const balanceBefore = currentUserData.userBalance;
             const newTx = {
                 id: 'tx_' + Date.now() + Math.random().toString(36).substring(2, 9),
@@ -954,10 +1346,18 @@
                 date: new Date().toISOString(),
                 description: description,
                 balanceBefore: balanceBefore,
-                balanceAfter: 0
+                balanceAfter: 0,
+                ...details // Add any extra details like bank info for withdrawals/deposits
             };
+            
+            // For investment withdrawals, the balanceAfter should reflect the new liquid balance
+            if (type === 'investmentWithdraw') {
+                newTx.balanceAfter = balanceBefore + amount;
+            } else {
+                 newTx.balanceAfter = currentUserData.userBalance;
+            }
+
             currentUserData.transactions.unshift(newTx);
-            newTx.balanceAfter = currentUserData.userBalance;
         }
 
         function updateBalanceDisplay() {
@@ -975,7 +1375,7 @@
             // Only count active or matured investments for total value display
             currentUserData.investments.forEach(inv => {
                 if (inv.status === 'active' || inv.status === 'matured') {
-                    totalValue += (inv.planType === 'Rapid Growth Plan' || inv.planType === 'Quick Return Plan') ? inv.currentValue : inv.initialAmount;
+                    totalValue += inv.currentValue; // Sum current value for all
                 }
             });
             totalInvestmentValueP.textContent = `₦${totalValue.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -1021,9 +1421,16 @@
 
         function hideAllDepositErrors() {
             document.getElementById('depositAmountError').classList.add('hidden');
+            document.getElementById('senderAccountNameError').classList.add('hidden');
+            document.getElementById('senderBankNameError').classList.add('hidden');
             document.getElementById('transferAccountNumberError').classList.add('hidden');
+            document.getElementById('depositReceiptError').classList.add('hidden');
+            
             document.getElementById('depositAmount').classList.remove('border-red-500');
+            document.getElementById('senderAccountName').classList.remove('border-red-500');
+            document.getElementById('senderBankName').classList.remove('border-red-500');
             document.getElementById('transferAccountNumber').classList.remove('border-red-500');
+            document.getElementById('depositReceipt').classList.remove('border-red-500');
         }
 
         function hideAllWithdrawalErrors() {
@@ -1044,6 +1451,7 @@
 
             investmentsList.innerHTML = '';
 
+            // Filter out 'redeemed' and 'withdrawn' investments for the main display
             const investmentsToDisplay = currentUserData.investments.filter(inv => inv.status !== 'redeemed' && inv.status !== 'withdrawn');
 
             if (investmentsToDisplay.length === 0) {
@@ -1067,15 +1475,28 @@
                             statusText = `Matured! Value: ₦${investment.currentValue.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                             buttonHtml = `<button data-id="${investment.id}" class="redeem-investment-button w-full mt-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">Redeem ₦${investment.targetAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</button>`;
                         }
-                    } else {
-                        // Steady Income and Long-Term Growth Plans
-                        if (investment.status === 'withdrawn') {
-                             borderColorClass = 'border-gray-500';
-                             statusText = `Withdrawn: ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    } else { 
+                        // For Steady Income, Long-Term Growth, and Mega Oil Prospector plans
+                        if (investment.planType === 'Mega Oil Prospector Plan') {
+                             borderColorClass = investment.status === 'matured' ? 'border-green-500' : 'border-indigo-500';
                         } else {
-                            borderColorClass = 'border-blue-500';
-                            statusText = `Active (Initial Value): ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                            buttonHtml = `<button data-id="${investment.id}" class="withdraw-investment-button w-full mt-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">Withdraw ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</button>`;
+                             borderColorClass = 'border-blue-500';
+                        }
+                       
+                        const startDate = new Date(investment.startDate);
+                        const today = new Date();
+
+                        if (investment.status === 'active') {
+                             if (investment.maturityDate) {
+                                const maturityDate = new Date(investment.maturityDate);
+                                const remainingDays = Math.ceil((maturityDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                                statusText = `Active (Matures in ${Math.max(0, remainingDays)} days). Target: ₦${investment.targetAmount.toLocaleString('en-NG')}`;
+                             } else {
+                                statusText = `Active (Initial Value): ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                             }
+                        } else if (investment.status === 'matured') {
+                            statusText = `Matured! Value: ₦${investment.targetAmount.toLocaleString('en-NG')}`;
+                            buttonHtml = `<button data-id="${investment.id}" class="redeem-investment-button w-full mt-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">Redeem ₦${investment.targetAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</button>`;
                         }
                     }
 
@@ -1093,10 +1514,83 @@
                 document.querySelectorAll('.redeem-investment-button').forEach(button => {
                     button.onclick = handleRedeemInvestment;
                 });
-                document.querySelectorAll('.withdraw-investment-button').forEach(button => {
-                    button.onclick = handleWithdrawInvestment;
+            }
+        }
+
+        // NEW: Function to render investments specifically for withdrawal panel
+        function renderInvestmentsForWithdrawal() {
+            const investmentsToWithdrawList = document.getElementById('investmentsToWithdrawList');
+            const noInvestmentsToWithdrawMessage = document.getElementById('noInvestmentsToWithdrawMessage');
+            investmentsToWithdrawList.innerHTML = ''; // Clear previous list
+
+            // Only show investments that are active or matured and NOT yet redeemed/withdrawn
+            const withdrawableInvestments = currentUserData.investments.filter(inv => 
+                (inv.status === 'active' || inv.status === 'matured') && inv.status !== 'redeemed' && inv.status !== 'withdrawn'
+            );
+
+            if (withdrawableInvestments.length === 0) {
+                noInvestmentsToWithdrawMessage.classList.remove('hidden');
+            } else {
+                noInvestmentsToWithdrawMessage.classList.add('hidden');
+                withdrawableInvestments.forEach(investment => {
+                    const investmentDiv = document.createElement('div');
+                    let statusText = '';
+                    let borderColorClass = '';
+
+                    if (investment.planType === 'Rapid Growth Plan' || investment.planType === 'Quick Return Plan') {
+                        borderColorClass = investment.status === 'matured' ? 'border-green-500' : 'border-amber-500';
+                        statusText = investment.status === 'active' ? `Current Value: ₦${investment.currentValue.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : `Matured Value: ₦${investment.currentValue.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    } else {
+                        borderColorClass = investment.planType === 'Mega Oil Prospector Plan' ? (investment.status === 'matured' ? 'border-green-500' : 'border-indigo-500') : 'border-blue-500';
+                        statusText = investment.status === 'active' ? `Initial Value: ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : `Matured Value: ₦${investment.targetAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    }
+
+                    investmentDiv.className = `bg-gray-100 p-4 rounded-xl shadow-md border-t-4 ${borderColorClass} transition-transform duration-300 card-hover`;
+                    investmentDiv.innerHTML = `
+                        <h4 class="font-bold text-lg sm:text-xl mb-2">${investment.name}</h4>
+                        <p class="text-sm sm:text-base text-gray-700">Initial Capital: ₦${investment.initialAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        <p class="text-sm sm:text-base text-gray-700">${statusText}</p>
+                        <p class="text-xs text-gray-500 mt-2">Started: ${new Date(investment.startDate).toLocaleDateString()}</p>
+                        <button data-id="${investment.id}" class="withdraw-investment-button w-full mt-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-full shadow-md transition-transform duration-300 transform hover:scale-105 active:scale-95 button-hover hover:shadow-lg">
+                            Withdraw Capital (Cancel)
+                        </button>
+                    `;
+                    investmentsToWithdrawList.appendChild(investmentDiv);
+                });
+
+                document.querySelectorAll('#investmentsToWithdrawList .withdraw-investment-button').forEach(button => {
+                    button.onclick = (event) => showWithdrawConfirmation(event.target.dataset.id);
                 });
             }
+        }
+
+
+        // --- Custom Modal Logic for Withdraw Investment ---
+        let currentInvestmentIdToWithdraw = null; // Store ID for modal confirmation
+
+        function showWithdrawConfirmation(investmentId) {
+            currentInvestmentIdToWithdraw = investmentId;
+            const modal = document.getElementById('confirmationModal');
+            modal.classList.add('open');
+            // Attach listeners for modal buttons
+            document.getElementById('cancelWithdrawalConfirm').onclick = hideWithdrawConfirmation;
+            document.getElementById('confirmWithdrawalAction').onclick = () => {
+                // Set the processing state for the specific investment's withdraw button
+                // Find the button within the withdrawInvestmentPanel
+                const withdrawButton = document.querySelector(`#withdrawInvestmentPanel .withdraw-investment-button[data-id="${currentInvestmentIdToWithdraw}"]`);
+                if (withdrawButton) {
+                    setButtonProcessingState(withdrawButton, true);
+                }
+                
+                handleWithdrawInvestment(currentInvestmentIdToWithdraw);
+                hideWithdrawConfirmation();
+            };
+        }
+
+        function hideWithdrawConfirmation() {
+            const modal = document.getElementById('confirmationModal');
+            modal.classList.remove('open');
+            currentInvestmentIdToWithdraw = null; // Clear stored ID
         }
 
         function handleRedeemInvestment(event) {
@@ -1110,7 +1604,7 @@
                 if (investmentIndex > -1) {
                     const investment = currentUserData.investments[investmentIndex];
                     if (investment.status === 'matured') {
-                        const redemptionAmount = investment.targetAmount;
+                        const redemptionAmount = investment.targetAmount; // Use targetAmount for redemption
                         currentUserData.userBalance += redemptionAmount;
                         investment.status = 'redeemed';
 
@@ -1118,7 +1612,7 @@
                         saveCurrentUserData();
                         updateBalanceDisplay();
                         updateTotalInvestmentValueDisplay(); 
-                        renderInvestments();
+                        renderInvestments(); // Re-render main investments list
                         showDashboardStatusMessage(`Successfully redeemed ₦${redemptionAmount.toLocaleString('en-NG')} from your investment! Your liquid balance has been updated.`, 'success');
                     } else {
                         showDashboardStatusMessage("Investment is not matured for redemption.", "error");
@@ -1130,35 +1624,40 @@
             }, PROCESS_DELAY_MS);
         }
 
-        function handleWithdrawInvestment(event) {
-            const button = event.target;
-            setButtonProcessingState(button, true);
+        // Modified handleWithdrawInvestment to accept ID directly
+        function handleWithdrawInvestment(investmentId) {
+            // Find the button associated with this investment to update its state
+            const withdrawButton = document.querySelector(`#withdrawInvestmentPanel .withdraw-investment-button[data-id="${investmentId}"]`);
 
             setTimeout(() => {
-                const investmentId = button.dataset.id;
                 const investmentIndex = currentUserData.investments.findIndex(inv => inv.id === investmentId);
 
                 if (investmentIndex > -1) {
                     const investment = currentUserData.investments[investmentIndex];
-                    if (investment.status === 'active' && (investment.planType === 'Steady Income Plan' || investment.planType === 'Long-Term Growth Plan')) {
+                    // Allow withdrawal for any 'active' or 'matured' plan (that hasn't been redeemed yet)
+                    if (investment.status === 'active' || investment.status === 'matured') {
                         const withdrawalAmount = investment.initialAmount;
                         
                         currentUserData.userBalance += withdrawalAmount;
-                        investment.status = 'withdrawn';
+                        investment.status = 'withdrawn'; // Mark as withdrawn/cancelled
 
-                        recordTransaction('investmentWithdraw', withdrawalAmount, `Withdrew ${investment.name} to liquid balance`);
+                        recordTransaction('investmentWithdraw', withdrawalAmount, `Withdrew capital from ${investment.name}. No profits earned on early withdrawal.`);
                         saveCurrentUserData();
                         updateBalanceDisplay();
                         updateTotalInvestmentValueDisplay(); 
-                        renderInvestments();
-                        showDashboardStatusMessage(`Successfully withdrew ₦${withdrawalAmount.toLocaleString('en-NG')} from your investment! Your liquid balance has been updated.`, 'success');
+                        renderInvestments(); // Re-render main investments list
+                        renderInvestmentsForWithdrawal(); // Re-render withdrawal list to remove the item
+                        showDashboardStatusMessage(`Successfully withdrew ₦${withdrawalAmount.toLocaleString('en-NG')} capital from "${investment.name}". Note: Any potential profits were forfeited.`, 'info');
                     } else {
                         showDashboardStatusMessage("This investment cannot be withdrawn at this time.", "error");
                     }
                 } else {
                     showDashboardStatusMessage("Investment not found.", "error");
                 }
-                setButtonProcessingState(button, false);
+                // Ensure the button state is reset after action
+                if (withdrawButton) {
+                    setButtonProcessingState(withdrawButton, false);
+                }
             }, PROCESS_DELAY_MS);
         }
 
@@ -1170,6 +1669,7 @@
 
             for (let i = 0; i < currentUserData.investments.length; i++) {
                 const investment = currentUserData.investments[i];
+                // Apply daily growth for Rapid Growth and Quick Return Plans
                 if ((investment.planType === 'Rapid Growth Plan' || investment.planType === 'Quick Return Plan') && investment.status === 'active') {
                     const lastAppliedDate = new Date(investment.lastGrowthAppliedDate);
                     lastAppliedDate.setHours(0, 0, 0, 0);
@@ -1194,13 +1694,25 @@
                         updatesMade = true;
                     }
                 }
+                // Check for maturity for Mega Oil Prospector Plan
+                else if (investment.planType === 'Mega Oil Prospector Plan' && investment.status === 'active') {
+                    const maturityDate = new Date(investment.maturityDate);
+                    maturityDate.setHours(0, 0, 0, 0); // Normalize to start of day
+
+                    if (today.getTime() >= maturityDate.getTime()) {
+                        investment.currentValue = investment.targetAmount; // Set current value to target upon maturity
+                        investment.status = 'matured';
+                        updatesMade = true;
+                        console.log(`Mega Oil Prospector Investment ${investment.id} matured!`);
+                    }
+                }
             }
 
             if (updatesMade) {
                 saveCurrentUserData();
                 updateTotalInvestmentValueDisplay(); 
                 renderInvestments();
-                console.log("Daily growth applied to investments.");
+                console.log("Daily growth/maturity applied to investments.");
             }
         }
 
@@ -1221,36 +1733,33 @@
                 let amountSign = '';
                 let amountColorClass = 'text-gray-800';
                 let formattedAmount = tx.amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                let receiptButtonHtml = '';
 
-                switch (tx.type) {
-                    case 'deposit':
-                        typeColorClass = 'text-blue-600';
-                        amountSign = '+';
-                        amountColorClass = 'text-green-600';
-                        break;
-                    case 'withdrawalToBank':
-                        typeColorClass = 'text-purple-600';
-                        amountSign = '-';
-                        amountColorClass = 'text-red-600';
-                        break;
-                    case 'investmentBuy':
-                        typeColorClass = 'text-amber-600';
-                        amountSign = '-';
-                        amountColorClass = 'text-red-600';
-                        break;
-                    case 'investmentRedeem':
-                        typeColorClass = 'text-green-600';
-                        amountSign = '+';
-                        amountColorClass = 'text-green-600';
-                        break;
-                    case 'investmentWithdraw':
-                        typeColorClass = 'text-red-600';
-                        amountSign = '+';
-                        amountColorClass = 'text-green-600';
-                        break;
-                    default:
-                        break;
+                if (tx.type === 'deposit' || tx.type === 'withdrawalToBank') {
+                    typeColorClass = (tx.type === 'deposit') ? 'text-blue-600' : 'text-purple-600';
+                    amountSign = (tx.type === 'deposit') ? '+' : '-';
+                    amountColorClass = (tx.type === 'deposit') ? 'text-green-600' : 'text-red-600';
+                    receiptButtonHtml = `<button class="download-receipt-history-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors mt-2" data-tx-id="${tx.id}">Download Receipt</button>`;
+                } else if (tx.type === 'investmentBuy') {
+                    typeColorClass = 'text-amber-600';
+                    amountSign = '-';
+                    amountColorClass = 'text-red-600';
+                } else if (tx.type === 'investmentRedeem') {
+                    typeColorClass = 'text-green-600';
+                    amountSign = '+';
+                    amountColorClass = 'text-green-600';
+                } else if (tx.type === 'investmentWithdraw') { // Early withdrawal of capital
+                    typeColorClass = 'text-red-600 font-semibold'; // Make it stand out
+                    amountSign = '+'; // It's a credit to liquid balance
+                    amountColorClass = 'text-green-600'; // The cash comes back to liquid balance
+                } else {
+                    // Default for other transaction types without special handling
+                    typeColorClass = 'text-gray-800';
+                    amountSign = '';
+                    amountColorClass = 'text-gray-800';
                 }
+                
+                let balanceAfterFormatted = (tx.balanceAfter !== undefined) ? tx.balanceAfter.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A';
 
                 txDiv.className = 'bg-gray-100 p-3 sm:p-4 rounded-lg shadow-sm mb-3 flex flex-col md:flex-row md:justify-between md:items-center';
                 txDiv.innerHTML = `
@@ -1258,12 +1767,26 @@
                         <p class="font-semibold text-sm sm:text-base ${typeColorClass}">${tx.description}</p>
                         <p class="text-xs text-gray-500">${new Date(tx.date).toLocaleString()}</p>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex flex-col items-end">
                         <p class="font-bold text-sm sm:text-base ${amountColorClass}">${amountSign}₦${formattedAmount}</p>
-                        <p class="text-xs text-gray-600">Balance: ₦${tx.balanceAfter.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        <p class="text-xs text-gray-600">Balance: ₦${balanceAfterFormatted}</p>
+                        ${receiptButtonHtml}
                     </div>
                 `;
                 historyList.appendChild(txDiv);
+            });
+
+            // Re-attach event listeners for new download receipt buttons after rendering history
+            document.querySelectorAll('.download-receipt-history-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const txId = event.target.dataset.txId;
+                    const transaction = currentUserData.transactions.find(t => t.id === txId);
+                    if (transaction) {
+                        downloadReceiptAsPNG(transaction);
+                    } else {
+                        showDashboardStatusMessage("Transaction details not found for receipt.", "error");
+                    }
+                });
             });
         }
 
@@ -1271,15 +1794,24 @@
             const pendingIndex = currentUserData.pendingDeposits.findIndex(req => req.id === depositId);
             if (pendingIndex > -1) {
                 const depositRequest = currentUserData.pendingDeposits[pendingIndex];
-                currentUserData.userBalance += depositRequest.amount;
+                
+                recordTransaction('deposit', depositRequest.amount, `Deposit confirmed: ₦${depositRequest.amount.toLocaleString('en-NG')}`, {
+                    depositorName: currentUserData.username,
+                    sourceAccountName: depositRequest.senderAccountName,
+                    sourceAccountNumber: depositRequest.accountNumber,
+                    sourceBankName: depositRequest.senderBankName,
+                    destinationAccountNumber: depositRequest.depositAccountNumber,
+                    destinationBankName: depositRequest.depositBankName,
+                    receiptProvided: depositRequest.receiptProvided
+                });
 
-                recordTransaction('deposit', depositRequest.amount, `Deposit confirmed: ₦${depositRequest.amount.toLocaleString('en-NG')}`);
+                currentUserData.userBalance += depositRequest.amount;
                 
                 currentUserData.pendingDeposits.splice(pendingIndex, 1);
                 saveCurrentUserData();
                 updateBalanceDisplay();
                 renderTransactionHistory();
-                showDashboardStatusMessage(`Deposit of ₦${depositRequest.amount.toLocaleString('en-NG')} is now available!`, 'success');
+                showDashboardStatusMessage(`Deposit of ₦${depositRequest.amount.toLocaleString('en-NG')} is now available! ${depositRequest.receiptProvided ? 'Receipt verified.' : ''}`, 'success');
             }
         }
 
@@ -1287,17 +1819,16 @@
             const pendingIndex = currentUserData.pendingWithdrawals.findIndex(req => req.id === withdrawalId);
             if (pendingIndex > -1) {
                 const withdrawalRequest = currentUserData.pendingWithdrawals[pendingIndex];
-                currentUserData.userBalance -= withdrawalRequest.amount;
 
-                recordTransaction('withdrawalToBank', withdrawalRequest.amount, `Withdrawal confirmed: ₦${withdrawalRequest.amount.toLocaleString('en-NG')} to ${withdrawalRequest.bankAccountName} (${withdrawalRequest.bankAccountNumber}) - ${withdrawalRequest.bankName}`);
+                recordTransaction('withdrawalToBank', withdrawalRequest.amount, `Withdrawal confirmed: ₦${withdrawalRequest.amount.toLocaleString('en-NG')} to ${withdrawalRequest.bankAccountName} (${withdrawalRequest.bankAccountNumber}) - ${withdrawalRequest.bankName}`, withdrawalRequest);
+
+                currentUserData.userBalance -= withdrawalRequest.amount;
                 
                 currentUserData.pendingWithdrawals.splice(pendingIndex, 1);
                 saveCurrentUserData();
                 updateBalanceDisplay();
                 renderTransactionHistory();
                 showDashboardStatusMessage(`Withdrawal of ₦${withdrawalRequest.amount.toLocaleString('en-NG')} processed. Funds sent to your bank account.`, 'success');
-                
-                generateAndShowReceipt(withdrawalRequest);
             }
         }
         
@@ -1314,7 +1845,7 @@
                     setTimeout(() => {
                         processDepositApproval(deposit.id);
                     }, timeRemaining);
-                    console.log(`Scheduled deposit approval for ${currentUserData.userName} in ${timeRemaining / 1000} seconds.`);
+                    console.log(`Scheduled deposit approval for ${currentUserData.username} in ${timeRemaining / 1000} seconds.`);
                 }
             }
 
@@ -1328,44 +1859,168 @@
                     setTimeout(() => {
                         processWithdrawalApproval(withdrawal.id);
                     }, timeRemaining);
-                    console.log(`Scheduled withdrawal approval for ${currentUserData.userName} in ${timeRemaining / 1000} seconds.`);
+                    console.log(`Scheduled withdrawal approval for ${currentUserData.username} in ${timeRemaining / 1000} seconds.`);
                 }
             }
         }
 
-        function generateAndShowReceipt(withdrawalDetails) {
-            const receiptContentDiv = document.getElementById('receiptContent');
-            const receiptModal = document.getElementById('receiptModal');
-            
-            const withdrawalDate = new Date(withdrawalDetails.date).toLocaleString();
+        function downloadReceiptAsPNG(tx) {
+            const tempContainer = document.createElement('div');
+            tempContainer.className = 'receipt-container-temp'; // Apply defined styles
 
-            receiptContentDiv.innerHTML = `
-                <h4 class="text-xl font-bold text-center mb-4 text-gray-900">Official Withdrawal Receipt</h4>
-                <p class="text-sm mb-2"><span class="font-semibold">Transaction ID:</span> ${withdrawalDetails.id}</p>
-                <p class="text-sm mb-2"><span class="font-semibold">Date:</span> ${withdrawalDate}</p>
-                <p class="text-sm mb-2"><span class="font-semibold">Amount Withdrawn:</span> <span class="font-bold text-lg text-red-600">₦${withdrawalDetails.amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
-                <p class="text-sm mb-2"><span class="font-semibold">Recipient Name:</span> ${withdrawalDetails.bankAccountName}</p>
-                <p class="text-sm mb-2"><span class="font-semibold">Account Number:</span> ${withdrawalDetails.bankAccountNumber}</p>
-                <p class="text-sm mb-2"><span class="font-semibold">Bank Name:</span> ${withdrawalDetails.bankName}</p>
-                <p class="text-sm mt-4 text-center text-gray-600">Thank you for banking with Thx Oil And Gas Investment.</p>
-                <p class="text-xs text-center text-gray-500 mt-2">Generated: ${new Date().toLocaleString()}</p>
+            const txDate = new Date(tx.date);
+            const formattedDate = txDate.toLocaleDateString('en-NG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const formattedTime = txDate.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
+
+            let amountLabel = '';
+            let detailsHtml = '';
+            let debitCreditClass = ''; // For amount color on receipt
+
+            if (tx.type === 'withdrawalToBank') {
+                amountLabel = 'DEBIT';
+                debitCreditClass = 'text-red-600'; // Red for debits on our side, like in Moniepoint example
+                const randomAdminId = Math.random().toString(36).substring(2, 8).toUpperCase(); // Generate random ID for admin
+                detailsHtml = `
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Transaction Type</p>
+                        <p class="receipt-detail-value-temp text-blue-600">TRANSFER</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Beneficiary</p>
+                        <p class="receipt-detail-value-temp">${tx.bankAccountName} | ${tx.bankAccountNumber}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Beneficiary Institution</p>
+                        <p class="receipt-detail-value-temp">${tx.bankName}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Sender Name</p>
+                        <p class="receipt-detail-value-temp">Thx Admin-${randomAdminId}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Source Institution</p>
+                        <p class="receipt-detail-value-temp">Thx Oil And Gas Investment</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Transaction Date</p>
+                        <p class="receipt-detail-value-temp">${formattedDate} | ${formattedTime}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Provider Reference</p>
+                        <p class="receipt-detail-value-temp text-gray-700">TXN-${tx.id.substring(tx.id.length - 8).toUpperCase()}</p>
+                    </div>
+                `;
+            } else if (tx.type === 'deposit') {
+                amountLabel = 'CREDIT';
+                debitCreditClass = 'text-green-600'; // Green for credits on our side
+                detailsHtml = `
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Transaction Type</p>
+                        <p class="receipt-detail-value-temp text-green-600">DEPOSIT</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Depositor Name</p>
+                        <p class="receipt-detail-value-temp">${tx.depositorName || currentUserData.username}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Depositor Account Name</p>
+                        <p class="receipt-detail-value-temp">${tx.sourceAccountName || 'N/A'}</p>
+                    </div>
+                     <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Depositor Account Number</p>
+                        <p class="receipt-detail-value-temp">${tx.sourceAccountNumber || 'N/A'}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Depositor Bank</p>
+                        <p class="receipt-detail-value-temp">${tx.sourceBankName || 'N/A'}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Recipient Account</p>
+                        <p class="receipt-detail-value-temp">${tx.destinationAccountNumber || 'N/A'}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Recipient Bank</p>
+                        <p class="receipt-detail-value-temp">${tx.destinationBankName || 'N/A'}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Transaction Date</p>
+                        <p class="receipt-detail-value-temp">${formattedDate} | ${formattedTime}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Reference</p>
+                        <p class="receipt-detail-value-temp text-gray-700">DEP-${tx.id.substring(tx.id.length - 8).toUpperCase()}</p>
+                    </div>
+                     ${tx.receiptProvided ? `
+                     <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Proof of Payment</p>
+                        <p class="receipt-detail-value-temp text-green-600">Provided</p>
+                    </div>` : ''}
+                `;
+            } else {
+                amountLabel = tx.type.toUpperCase(); // Fallback for other transaction types
+                debitCreditClass = 'text-gray-800'; // Default for other types
+                 detailsHtml = `
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Description</p>
+                        <p class="receipt-detail-value-temp">${tx.description}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Transaction Type</p>
+                        <p class="receipt-detail-value-temp">${tx.type.toUpperCase()}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Transaction Date</p>
+                        <p class="receipt-detail-value-temp">${formattedDate} | ${formattedTime}</p>
+                    </div>
+                    <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Amount</p>
+                        <p class="receipt-detail-value-temp">₦${tx.amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                     <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Balance After</p>
+                        <p class="receipt-detail-value-temp">₦${tx.balanceAfter.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                     <div class="receipt-detail-item-temp">
+                        <p class="receipt-detail-label-temp">Reference</p>
+                        <p class="receipt-detail-value-temp text-gray-700">${tx.id}</p>
+                    </div>
+                 `;
+            }
+
+            tempContainer.innerHTML = `
+                <div class="receipt-header-logo-temp">
+                    <span class="text-blue-800 font-bold text-xl">Thx Oil And Gas Investment</span>
+                </div>
+                <div class="receipt-amount-section-temp">
+                    <div>
+                        <p class="text-lg font-semibold opacity-80">${amountLabel}</p>
+                        <p class="receipt-amount-text-temp ${debitCreditClass}">₦${tx.amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-white text-blue-800 rounded-full flex items-center justify-center font-bold text-2xl">
+                        T
+                    </div>
+                </div>
+                <div class="receipt-details-section-temp">
+                    ${detailsHtml}
+                </div>
             `;
-            receiptModal.classList.remove('hidden');
-        }
 
-        function downloadReceiptAsPNG() {
-            const receiptContent = document.getElementById('receiptContent');
-            html2canvas(receiptContent, {
-                scale: 2,
-                useCORS: true
+            document.body.appendChild(tempContainer); // Add to DOM off-screen for html2canvas
+
+            html2canvas(tempContainer, {
+                scale: 2, // Increase scale for better resolution
+                useCORS: true,
+                backgroundColor: null // Transparent background for the capture
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'thx_withdrawal_receipt.png';
+                link.download = `thx_receipt_${tx.id}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+                tempContainer.remove(); // Clean up the temporary element
             }).catch(error => {
                 console.error('Error generating receipt:', error);
                 showDashboardStatusMessage('Failed to generate receipt. Please try again.', 'error');
+                tempContainer.remove(); // Ensure cleanup even on error
             });
         }
 
@@ -1380,9 +2035,11 @@
             const loginSubmitButton = document.getElementById('loginSubmitButton');
 
             const signupForm = document.getElementById('signupForm');
-            const signupPhoneInput = document.getElementById('signupPhone');
+            const signupUsernameInput = document.getElementById('signupUsername'); // New: Username input
             const signupEmailInput = document.getElementById('signupEmail');
+            const signupPhoneInput = document.getElementById('signupPhone');
             const signupPasswordInput = document.getElementById('signupPassword');
+            const signupUsernameError = document.getElementById('signupUsernameError'); // New: Username error
             const signupPhoneError = document.getElementById('signupPhoneError');
             const signupEmailError = document.getElementById('signupEmailError');
             const signupPasswordError = document.getElementById('signupPasswordError');
@@ -1390,18 +2047,23 @@
 
             const depositButton = document.getElementById('depositButton');
             const withdrawToBankButton = document.getElementById('withdrawToBankButton');
+            const withdrawInvestmentButton = document.getElementById('withdrawInvestmentButton'); // NEW
             const historyButton = document.getElementById('historyButton');
             const logoutButton = document.getElementById('logoutButton');
 
-            const depositModal = document.getElementById('depositModal');
-            const withdrawModal = document.getElementById('withdrawModal');
-            const historyModal = document.getElementById('historyModal');
-            const receiptModal = document.getElementById('receiptModal');
+            // Get the new panel sections
+            const depositPanel = document.getElementById('depositPanel');
+            const withdrawPanel = document.getElementById('withdrawPanel');
+            const withdrawInvestmentPanel = document.getElementById('withdrawInvestmentPanel'); // NEW
+            const historyPanel = document.getElementById('historyPanel');
 
             const depositAccountNumberDisplay = document.getElementById('depositAccountNumberDisplay');
             const depositBankNameDisplay = document.getElementById('depositBankNameDisplay');
             const depositAmountInput = document.getElementById('depositAmount');
+            const senderAccountNameInput = document.getElementById('senderAccountName'); // NEW
+            const senderBankNameInput = document.getElementById('senderBankName'); // NEW
             const transferAccountNumberInput = document.getElementById('transferAccountNumber');
+            const depositReceiptInput = document.getElementById('depositReceipt'); // NEW
 
             const withdrawAmountInput = document.getElementById('withdrawAmount');
             const bankAccountNameInput = document.getElementById('bankAccountName');
@@ -1409,23 +2071,25 @@
             const bankNameInput = document.getElementById('bankName');
 
             const depositAmountError = document.getElementById('depositAmountError');
+            const senderAccountNameError = document.getElementById('senderAccountNameError'); // NEW
+            const senderBankNameError = document.getElementById('senderBankNameError'); // NEW
             const transferAccountNumberError = document.getElementById('transferAccountNumberError');
+            const depositReceiptError = document.getElementById('depositReceiptError'); // NEW
 
             const withdrawAmountError = document.getElementById('withdrawAmountError');
             const bankAccountNameError = document.getElementById('bankAccountNameError');
             const bankAccountNumberError = document.getElementById('bankAccountNumberError');
             const bankNameError = document.getElementById('bankNameError');
 
-            const cancelDepositButton = document.getElementById('cancelDeposit');
+            const cancelDepositPanelButton = document.getElementById('cancelDepositPanel');
             const confirmDepositButton = document.getElementById('confirmDeposit');
 
-            const cancelWithdrawalButton = document.getElementById('cancelWithdrawal');
+            const cancelWithdrawalPanelButton = document.getElementById('cancelWithdrawalPanel');
             const confirmWithdrawalButton = document.getElementById('confirmWithdrawal');
 
-            const closeHistoryModalButton = document.getElementById('closeHistoryModal');
-            const downloadReceiptButton = document.getElementById('downloadReceiptButton');
-            const closeReceiptModalButton = document.getElementById('closeReceiptModalButton');
-
+            const closeWithdrawInvestmentPanelButton = document.getElementById('closeWithdrawInvestmentPanel'); // NEW
+            const closeHistoryPanelButton = document.getElementById('closeHistoryPanel');
+            
             const investButtons = document.querySelectorAll('.invest-button');
 
             // Mobile nav toggles
@@ -1449,6 +2113,14 @@
                 showHomePage();
             }
 
+            // Function to hide all functional panels
+            function hideAllFunctionalPanels() {
+                depositPanel.classList.add('hidden');
+                withdrawPanel.classList.add('hidden');
+                withdrawInvestmentPanel.classList.add('hidden'); // NEW
+                historyPanel.classList.add('hidden');
+            }
+
             loginForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 showLoginStatusMessage('', 'hidden');
@@ -1457,10 +2129,10 @@
                 loginPasswordInput.classList.remove('border-red-500');
 
                 let isValid = true;
-                const username = loginUsernameInput.value.trim();
+                const loginIdentifier = loginUsernameInput.value.trim(); // This input will be either email or phone
                 const password = loginPasswordInput.value.trim();
 
-                if (username === '') {
+                if (loginIdentifier === '') {
                     loginUsernameError.classList.remove('hidden');
                     loginUsernameInput.classList.add('border-red-500');
                     isValid = false;
@@ -1479,15 +2151,16 @@
                 if (isValid) {
                     setButtonProcessingState(loginSubmitButton, true);
                     setTimeout(() => {
-                        if (allUsers[username] && allUsers[username].password === password) {
-                            loggedInUsername = username;
+                        // Check if the loginIdentifier (email/phone) exists in allUsers
+                        if (allUsers[loginIdentifier] && allUsers[loginIdentifier].password === password) {
+                            loggedInUsername = loginIdentifier; // Store the identifier used for login
                             localStorage.setItem('loggedInUser', loggedInUsername);
-                            loadCurrentUserData();
+                            loadCurrentUserData(); // Load the full user data based on the stored key
                             checkAndProcessPendingTransactionsOnLoad();
                             showLoginStatusMessage('Login Successful! Redirecting...', 'success');
                             setTimeout(() => { showDashboardPage(); }, 500);
                         } else {
-                            showLoginStatusMessage('Login Failed! Invalid username or password.', 'error');
+                            showLoginStatusMessage('Login Failed! Invalid email/phone or password.', 'error');
                         }
                         setButtonProcessingState(loginSubmitButton, false, 'Log In');
                     }, PROCESS_DELAY_MS);
@@ -1500,14 +2173,24 @@
                 event.preventDefault();
                 showSignupStatusMessage('', 'hidden');
 
+                signupUsernameInput.classList.remove('border-red-500'); // Clear username error
                 signupPhoneInput.classList.remove('border-red-500');
                 signupEmailInput.classList.remove('border-red-500');
                 signupPasswordInput.classList.remove('border-red-500');
 
                 let isValid = true;
+                const username = signupUsernameInput.value.trim(); // Get username
                 const phone = signupPhoneInput.value.trim();
                 const email = signupEmailInput.value.trim();
                 const password = signupPasswordInput.value.trim();
+
+                if (username === '') { // Validate username
+                    signupUsernameError.classList.remove('hidden');
+                    signupUsernameInput.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    signupUsernameError.classList.add('hidden');
+                }
 
                 const phonePattern = /^(070|080|081|090|091)\d{8}$/;
                 if (!phonePattern.test(phone)) {
@@ -1537,25 +2220,32 @@
                 if (isValid) {
                     setButtonProcessingState(signupSubmitButton, true);
                     setTimeout(() => {
-                        if (allUsers[email] || (phone && allUsers[phone])) {
-                            showSignupStatusMessage('Account already exists with this email or phone number. Please login.', 'error');
+                        // Check if username, email, or phone already exists
+                        const usernameExists = Object.values(allUsers).some(user => user.username === username);
+                        const emailExists = Object.keys(allUsers).some(key => key === email);
+                        const phoneExists = Object.keys(allUsers).some(key => key === phone);
+
+
+                        if (usernameExists) {
+                            showSignupStatusMessage('Username already taken. Please choose another.', 'error');
+                        } else if (emailExists) { // Only check email for primary key existence
+                            showSignupStatusMessage('Account already exists with this email. Please login.', 'error');
+                        } else if (phoneExists) { // Only check phone for primary key existence
+                            showSignupStatusMessage('Account already exists with this phone number. Please login.', 'error');
                         } else {
-                            const newUserName = email.split('@')[0] || 'Investor';
                             const userData = {
+                                username: username, // Save the new username
                                 password: password,
-                                userName: newUserName,
                                 userBalance: 0.00,
                                 investments: [],
                                 transactions: [],
                                 pendingDeposits: [],
                                 pendingWithdrawals: []
                             };
-                            allUsers[email] = userData;
-
-                            if (phone && phone !== email) {
+                            allUsers[email] = userData; // Use email as primary key in allUsers
+                            if (phone) { // Also store by phone number if provided, pointing to the same user data
                                 allUsers[phone] = userData;
                             }
-
                             saveAllUsers();
 
                             showSignupStatusMessage('Account created successfully! You can now log in.', 'success');
@@ -1571,26 +2261,33 @@
             });
 
             depositButton.addEventListener('click', () => {
+                hideAllFunctionalPanels(); // Hide others before showing this one
                 const randomAccount = depositAccounts[Math.floor(Math.random() * depositAccounts.length)];
                 depositAccountNumberDisplay.textContent = randomAccount.account;
                 depositBankNameDisplay.textContent = randomAccount.bank;
 
-                depositModal.classList.remove('hidden'); // Show the modal
-                depositModal.classList.add('flex'); // Ensure it uses flexbox for centering
+                depositPanel.classList.remove('hidden'); // Show the panel
                 depositAmountInput.value = '';
+                senderAccountNameInput.value = ''; // Clear new field
+                senderBankNameInput.value = ''; // Clear new field
                 transferAccountNumberInput.value = '';
+                depositReceiptInput.value = ''; // Clear file input
                 hideAllDepositErrors();
                 setButtonProcessingState(confirmDepositButton, false, 'Confirm Deposit');
             });
 
-            cancelDepositButton.addEventListener('click', () => {
-                depositModal.classList.add('hidden'); // Hide the modal
-                depositModal.classList.remove('flex');
+            cancelDepositPanelButton.addEventListener('click', () => {
+                depositPanel.classList.add('hidden'); // Hide the panel
             });
 
             confirmDepositButton.addEventListener('click', () => {
                 const amount = parseFloat(depositAmountInput.value);
+                const senderAccountName = senderAccountNameInput.value.trim(); // NEW
+                const senderBankName = senderBankNameInput.value.trim(); // NEW
                 const transferAccountNumber = transferAccountNumberInput.value.trim();
+                const depositReceiptFile = depositReceiptInput.files[0]; // NEW
+                const selectedDepositAccount = depositAccounts.find(acc => acc.account === depositAccountNumberDisplay.textContent);
+
 
                 let isValid = true;
                 hideAllDepositErrors();
@@ -1601,6 +2298,18 @@
                     isValid = false;
                 }
 
+                if (senderAccountName === '') { // NEW VALIDATION
+                    senderAccountNameError.classList.remove('hidden');
+                    senderAccountNameInput.classList.add('border-red-500');
+                    isValid = false;
+                }
+
+                if (senderBankName === '') { // NEW VALIDATION
+                    senderBankNameError.classList.remove('hidden');
+                    senderBankNameInput.classList.add('border-red-500');
+                    isValid = false;
+                }
+
                 const accountNumPattern = /^\d{10}$/;
                 if (!accountNumPattern.test(transferAccountNumber)) {
                     transferAccountNumberError.classList.remove('hidden');
@@ -1608,22 +2317,44 @@
                     isValid = false;
                 }
 
+                // Optional: Validate receipt file type if selected
+                let receiptProvided = false;
+                if (depositReceiptFile) {
+                    if (depositReceiptFile.type !== 'image/png') {
+                        depositReceiptError.classList.remove('hidden');
+                        depositReceiptInput.classList.add('border-red-500');
+                        depositReceiptError.textContent = 'Only PNG files are allowed for receipts.';
+                        isValid = false;
+                    } else {
+                        receiptProvided = true; // Mark as provided for transaction record
+                    }
+                }
+
                 if (isValid) {
                     setButtonProcessingState(confirmDepositButton, true);
                     setTimeout(() => {
-                        depositModal.classList.add('hidden');
-                        depositModal.classList.remove('flex');
+                        depositPanel.classList.add('hidden'); // Hide after submission
                         const whatsappLink = `<a href="https://wa.me/2348037676772" target="_blank" class="text-blue-500 hover:underline">08037676772 <i class="fab fa-whatsapp text-green-500"></i></a>`;
-                        showDashboardStatusMessage(`Your deposit request has been submitted. It will be available in approximately 30 minutes, waiting for internal processing.<br>If you have any trouble, contact us: ${whatsappLink}`, 'info');
+                        let statusMsg = `Your deposit request has been submitted. It will be available in approximately 30 minutes, waiting for internal processing.`;
+                        if (receiptProvided) {
+                            statusMsg += `<br>Your receipt has been received and is awaiting verification.`;
+                        }
+                        statusMsg += `<br>If you have any trouble, contact us: ${whatsappLink}`;
+                        showDashboardStatusMessage(statusMsg, 'info');
 
                         const expectedApprovalTime = Date.now() + DEPOSIT_DELAY_MS;
                         const newPendingDeposit = {
                             id: 'pending_' + Date.now() + Math.random().toString(36).substring(2, 9),
                             amount: amount,
-                            senderName: "User's Account",
-                            accountNumber: transferAccountNumber,
+                            senderAccountName: senderAccountName, // NEW
+                            senderBankName: senderBankName,     // NEW
+                            accountNumber: transferAccountNumber, 
+                            sourceBankName: senderBankName, // Re-use for source bank in receipt
+                            depositAccountNumber: selectedDepositAccount.account, 
+                            depositBankName: selectedDepositAccount.bank, 
                             date: new Date().toISOString(),
-                            expectedApprovalTime: new Date(expectedApprovalTime).toISOString()
+                            expectedApprovalTime: new Date(expectedApprovalTime).toISOString(),
+                            receiptProvided: receiptProvided // NEW: flag if receipt was given
                         };
                         currentUserData.pendingDeposits.unshift(newPendingDeposit);
                         saveCurrentUserData();
@@ -1636,13 +2367,13 @@
                     }, PROCESS_DELAY_MS);
 
                 } else {
-                    showDashboardStatusMessage('Please fill in all required deposit details correctly.', 'error');
+                    showDashboardStatusMessage('Please fill in all required deposit details correctly and ensure your receipt is a PNG file.', 'error');
                 }
             });
 
             withdrawToBankButton.addEventListener('click', () => {
-                withdrawModal.classList.remove('hidden'); // Show the modal
-                withdrawModal.classList.add('flex'); // Ensure it uses flexbox for centering
+                hideAllFunctionalPanels(); // Hide others before showing this one
+                withdrawPanel.classList.remove('hidden'); // Show the panel
                 withdrawAmountInput.value = '';
                 bankAccountNameInput.value = '';
                 bankAccountNumberInput.value = '';
@@ -1651,9 +2382,8 @@
                 setButtonProcessingState(confirmWithdrawalButton, false, 'Confirm Withdrawal');
             });
 
-            cancelWithdrawalButton.addEventListener('click', () => {
-                withdrawModal.classList.add('hidden'); // Hide the modal
-                withdrawModal.classList.remove('flex');
+            cancelWithdrawalPanelButton.addEventListener('click', () => {
+                withdrawPanel.classList.add('hidden'); // Hide the panel
             });
 
             confirmWithdrawalButton.addEventListener('click', () => {
@@ -1665,9 +2395,10 @@
                 let isValid = true;
                 hideAllWithdrawalErrors();
 
-                if (isNaN(amountToWithdraw) || amountToWithdraw <= 0) {
+                if (isNaN(amountToWithdraw) || amountToWithdraw < 500) { // Changed minimum to 500
                     withdrawAmountError.classList.remove('hidden');
                     withdrawAmountInput.classList.add('border-red-500');
+                    withdrawAmountError.textContent = `Please enter a valid amount (minimum ₦500).`;
                     isValid = false;
                 } else if (amountToWithdraw > currentUserData.userBalance) {
                     withdrawAmountError.classList.remove('hidden');
@@ -1698,8 +2429,7 @@
                 if (isValid) {
                     setButtonProcessingState(confirmWithdrawalButton, true);
                     setTimeout(() => {
-                        withdrawModal.classList.add('hidden');
-                        withdrawModal.classList.remove('flex');
+                        withdrawPanel.classList.add('hidden'); // Hide after submission
                         const whatsappLink = `<a href="https://wa.me/2348037676772" target="_blank" class="text-blue-500 hover:underline">08037676772 <i class="fab fa-whatsapp text-green-500"></i></a>`;
                         showDashboardStatusMessage(`Your withdrawal request has been submitted. Funds will be sent in approximately 15 minutes, waiting for internal processing.<br>If you have any trouble, contact us: ${whatsappLink}`, 'info');
 
@@ -1728,24 +2458,32 @@
                 }
             });
 
+            // NEW: Withdraw Investment Button Listener
+            withdrawInvestmentButton.addEventListener('click', () => {
+                hideAllFunctionalPanels();
+                renderInvestmentsForWithdrawal(); // Populate the list
+                withdrawInvestmentPanel.classList.remove('hidden');
+            });
+
+            // NEW: Close Withdraw Investment Panel Listener
+            closeWithdrawInvestmentPanelButton.addEventListener('click', () => {
+                withdrawInvestmentPanel.classList.add('hidden');
+            });
+
             historyButton.addEventListener('click', () => {
+                hideAllFunctionalPanels(); // Hide others before showing this one
                 renderTransactionHistory();
-                historyModal.classList.remove('hidden');
+                historyPanel.classList.remove('hidden'); // Show the history panel
             });
 
-            closeHistoryModalButton.addEventListener('click', () => {
-                historyModal.classList.add('hidden');
+            closeHistoryPanelButton.addEventListener('click', () => {
+                historyPanel.classList.add('hidden'); // Hide the history panel
             });
-
-            downloadReceiptButton.addEventListener('click', downloadReceiptAsPNG);
-            closeReceiptModalButton.addEventListener('click', () => {
-                receiptModal.classList.add('hidden');
-            });
-
+            
             logoutButton.addEventListener('click', () => {
                 loggedInUsername = null;
                 localStorage.removeItem('loggedInUser');
-                currentUserData = { userName: "Investor", userBalance: 0.00, investments: [], transactions: [], pendingDeposits: [], pendingWithdrawals: [] }; 
+                currentUserData = { username: "Investor", userBalance: 0.00, investments: [], transactions: [], pendingDeposits: [], pendingWithdrawals: [] }; 
                 showHomePage();
             });
 
@@ -1757,11 +2495,12 @@
                     setTimeout(() => {
                         const planName = btn.dataset.planName;
                         const minInvestment = parseFloat(btn.dataset.minInvestment);
+                        const termDays = parseInt(btn.dataset.termDays); // For Mega Oil Prospector Plan
+                        const profitAmount = parseFloat(btn.dataset.profitAmount); // For Mega Oil Prospector Plan
 
                         const newInvestmentId = 'inv_' + Date.now() + Math.random().toString(36).substring(2, 9);
 
                         if (currentUserData.userBalance >= minInvestment) {
-                            const oldBalance = currentUserData.userBalance;
                             currentUserData.userBalance -= minInvestment;
                             
                             let newInvestment;
@@ -1791,14 +2530,29 @@
                                     targetAmount: QUICK_RETURN_TARGET_AMOUNT,
                                     status: 'active'
                                 };
-                            }
-                            else {
+                            } else if (planName === "Mega Oil Prospector Plan") { // New plan logic
+                                const startDate = new Date();
+                                const maturityDate = new Date();
+                                maturityDate.setDate(startDate.getDate() + termDays); // Calculate maturity date
                                 newInvestment = {
                                     id: newInvestmentId,
                                     planType: planName,
                                     name: `${planName} #${currentUserData.investments.filter(inv => inv.planType === planName).length + 1}`,
                                     initialAmount: minInvestment,
-                                    currentValue: minInvestment,
+                                    currentValue: minInvestment, // Starts at initial, grows to target upon maturity
+                                    startDate: startDate.toISOString(),
+                                    maturityDate: maturityDate.toISOString(),
+                                    targetAmount: minInvestment + profitAmount, // Initial + profit
+                                    status: 'active'
+                                };
+                            }
+                            else { // Steady Income Plan and Long-Term Growth Plan
+                                newInvestment = {
+                                    id: newInvestmentId,
+                                    planType: planName,
+                                    name: `${planName} #${currentUserData.investments.filter(inv => inv.planType === planName).length + 1}`,
+                                    initialAmount: minInvestment,
+                                    currentValue: minInvestment, // For these, currentValue remains initialAmount as profit is not accumulated daily here
                                     startDate: new Date().toISOString(),
                                     status: 'active',
                                 };
@@ -1821,15 +2575,20 @@
                 });
             });
 
+            // Event Listeners for hiding errors on input
             loginUsernameInput.addEventListener('input', () => { loginUsernameError.classList.add('hidden'); loginUsernameInput.classList.remove('border-red-500'); showLoginStatusMessage('', 'hidden'); });
             loginPasswordInput.addEventListener('input', () => { loginPasswordError.classList.add('hidden'); loginPasswordInput.classList.remove('border-red-500'); showLoginStatusMessage('', 'hidden'); });
 
+            signupUsernameInput.addEventListener('input', () => { signupUsernameError.classList.add('hidden'); signupUsernameInput.classList.remove('border-red-500'); showSignupStatusMessage('', 'hidden'); }); // For username input
             signupPhoneInput.addEventListener('input', () => { signupPhoneError.classList.add('hidden'); signupPhoneInput.classList.remove('border-red-500'); showSignupStatusMessage('', 'hidden'); });
             signupEmailInput.addEventListener('input', () => { signupEmailError.classList.add('hidden'); signupEmailInput.classList.remove('border-red-500'); showSignupStatusMessage('', 'hidden'); });
             signupPasswordInput.addEventListener('input', () => { signupPasswordError.classList.add('hidden'); signupPasswordInput.classList.remove('border-red-500'); showSignupStatusMessage('', 'hidden'); });
 
             depositAmountInput.addEventListener('input', hideAllDepositErrors);
+            senderAccountNameInput.addEventListener('input', hideAllDepositErrors); // NEW
+            senderBankNameInput.addEventListener('input', hideAllDepositErrors); // NEW
             transferAccountNumberInput.addEventListener('input', hideAllDepositErrors);
+            depositReceiptInput.addEventListener('change', hideAllDepositErrors); // NEW
 
             withdrawAmountInput.addEventListener('input', hideAllWithdrawalErrors);
             bankAccountNameInput.addEventListener('input', hideAllWithdrawalErrors);
