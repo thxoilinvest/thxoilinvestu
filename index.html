@@ -369,6 +369,7 @@
             <li><a href="#how-it-works" onclick="closeMobileNavAndGoTo('#how-it-works')">How It Works</a></li>
             <li><a href="#our-leadership" onclick="closeMobileNavAndGoTo('#our-leadership')">Our Leadership</a></li>
             <li><a href="#contact-us" onclick="closeMobileNavAndGoTo('#contact-us')">Contact Us</a></li>
+            <li><a href="#download-app" onclick="closeMobileNavAndGoTo('#download-app')">Download App</a></li> <!-- NEW -->
         </ul>
         <div class="mobile-auth-buttons">
             <a href="#" class="bg-blue-600 text-white" onclick="closeMobileNavAndGoTo('#login')">Login</a>
@@ -420,6 +421,7 @@
                         <li><a href="#how-it-works" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">How It Works</a></li>
                         <li><a href="#our-leadership" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">Our Leadership</a></li>
                         <li><a href="#contact-us" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">Contact Us</a></li>
+                        <li><a href="#download-app" class="hover:text-amber-400 transition-colors duration-300 text-lg font-medium">Download App</a></li> <!-- NEW -->
                         <li><a href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 button-hover" onclick="showLoginPage()">Login</a></li>
                         <li><a href="#" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 button-hover" onclick="showSignupPage()">Sign Up</a></li>
                     </ul>
@@ -439,6 +441,22 @@
                 <a href="#" class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-4 px-10 rounded-full text-xl md:text-2xl shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95 hero-button button-hover" onclick="showSignupPage()">
                     Start Investing Today!
                 </a>
+            </div>
+        </section>
+
+        <!-- NEW: Download App Section -->
+        <section id="download-app" class="py-16 md:py-24 bg-blue-800 text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-8 animate-on-scroll">Get the Thx Oil And Gas App!</h2>
+                <p class="text-xl md:text-2xl mb-12 max-w-3xl mx-auto opacity-90 animate-on-scroll">
+                    Enhance your investment experience with our dedicated mobile application. Download it now for seamless management on the go!
+                </p>
+                <a href="https://github.com/your-username/your-repo/raw/main/ThxOilAndGas.apk" download="ThxOilAndGas.apk" class="bg-green-500 hover:bg-green-600 text-white font-bold py-5 px-12 rounded-full text-2xl md:text-3xl shadow-xl transform transition-all duration-300 hover:scale-105 active:scale-95 button-hover animate-on-scroll">
+                    <i class="fas fa-download mr-3"></i> Download APK
+                </a>
+                <p class="mt-8 text-gray-300 animate-on-scroll">
+                    (Note: This is an Android Package Kit file. You may need to enable installation from unknown sources in your device settings.)
+                </p>
             </div>
         </section>
 
@@ -1982,7 +2000,7 @@
                     </div>
                      <div class="receipt-detail-item-temp">
                         <p class="receipt-detail-label-temp">Reference</p>
-                        <p class="receipt-detail-value-temp text-gray-700">${tx.id}</p>
+                        <p class="receipt-detail-value-temp">${tx.id}</p>
                     </div>
                  `;
             }
